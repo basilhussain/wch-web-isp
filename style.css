@@ -1,0 +1,311 @@
+body {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	background-color: white;
+	color: black;
+	font-family: sans-serif;
+	font-size: 10pt;
+}
+
+main {
+	width: 760px;
+}
+
+h1 {
+	font-size: 1.8em;
+}
+
+div#unsupported {
+	background-color: #FFEF00;
+	border: 4px dashed black;
+	padding: 1em;
+	font-size: 1.5em;
+	text-align: center;
+}
+
+div#unsupported p:first-child {
+	font-weight: bold;
+}
+
+div#unsupported.hidden {
+	display: none;
+}
+
+#form section {
+	margin: 1em 0;
+	border: 2px solid #AF0000;
+}
+
+#form section > h2:first-child {
+	margin: 0 0 0.5em 0;
+	padding: 0.25em;
+	background-color: #AF0000;
+	color: white;
+	font-size: 1em;
+}
+
+#form section > p, section > div, section > table {
+	margin: 0.5em;
+}
+
+input, select, button {
+	border: 1px solid #767676;
+	border-radius: 0;
+	color: black;
+	background-color: #EDEDED;
+	padding: 0.25em 0.4em;
+}
+
+input:focus, select:focus, button:focus {
+	outline-color: black;
+	outline-width: 3px;
+}
+
+button:active {
+	background-color: #D8D8D8;
+}
+
+button:disabled, select:disabled {
+	color: #1010104C;
+	
+}
+
+p.fw_ctrls {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+}
+
+p.fw_ctrls input[type="file"]#fw_file {
+	width: 100%;
+}
+
+span.fw_size {
+	margin-left: 0.5em;
+	white-space: nowrap;
+}
+
+div.hex {
+	height: 25ex;
+	overflow-y: scroll;
+	border: 1px solid black;
+	font-family: monospace;
+	white-space: pre;
+}
+
+div.hex {
+	padding: 0 0.2em;
+}
+
+div.hex > span.o {
+	font-weight: bold;
+	margin-right: 0.5em;
+	border-right: 1px solid black;
+	padding-right: 0.5em;
+}
+
+div.hex > span.p {
+	font-style: italic;
+	margin-left: 0.5em;
+	border-left: 1px solid black;
+	padding-left: 0.5em;
+}
+
+table.config {
+	border-spacing: 0.5em 0.2em;
+}
+
+table.config td:nth-child(odd) {
+	text-align: right;
+}
+
+table.config td input[type="text"] {
+	width: 4em;
+	background-repeat: no-repeat;
+	background-position: right center;
+	background-size: contain;
+}
+
+table.config td input[type="text"]:valid {
+	background-image: url("images/check-small.svg");
+}
+
+table.config td input[type="text"]:invalid {
+	background-image: url("images/cross-small.svg");
+}
+
+p#actions {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: flex-start;
+}
+
+p#actions > button {
+	margin-right: 1em;
+	padding-left: 1.95em;
+	background-repeat: no-repeat;
+	background-position: 0.25em center;
+	background-size: 1.5em;
+	height: 2.1em;
+}
+
+p#actions > button:last-child {
+	margin-right: 0;
+}
+
+p#actions > button:disabled {
+	background-blend-mode: overlay;
+}
+
+p#actions > button#config_read {
+	background-image: url("images/config-read.svg");
+}
+
+p#actions > button#config_write {
+	background-image: url("images/config-write.svg");
+}
+
+p#actions > button#flash_write {
+	background-image: url("images/flash-write.svg");
+}
+
+p#actions > button#flash_verify {
+	background-image: url("images/flash-verify.svg");
+}
+
+p#actions > button#flash_erase {
+	background-image: url("images/flash-erase.svg");
+}
+
+p.progress {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+}
+
+p.progress progress#progress_bar {
+	width: 100%;
+	height: 1.5em;
+}
+
+p.progress #progress_pct {
+	margin-left: 0.5em;
+}
+
+p.progress #progress_result {
+	display: none;
+	width: 1.5em;
+	height: 1.5em;
+	margin-right: 0.5em;
+	background-repeat: no-repeat;
+	background-position: center;
+	background-size: contain;
+}
+
+p.progress #progress_result.success {
+	display: block;
+	background-image: url("images/check-green.svg");
+}
+
+p.progress #progress_result.failure {
+	display: block;
+	background-image: url("images/cross-red.svg");
+}
+
+div#log {
+	height: 25ex;
+	overflow: scroll;
+	border: 1px solid black;
+	font-family: monospace;
+}
+
+div#log > p {
+	margin: 0;
+	white-space: pre;
+}
+
+div#log > p > .time {
+	color: #808080;
+}
+
+div#log > p > .level {
+	font-weight: bold;
+}
+
+div#log > p > .level.info {
+	color: #0072BF;
+}
+
+div#log > p > .level.warning {
+	color: #BF9F00;
+}
+
+div#log > p > .level.error {
+	color: #BF0000;
+}
+
+div#log > p > .level.debug {
+	color: #BF00A5;
+}
+
+p.log_ctrls {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+}
+
+section.help > h2 {
+	border-bottom: 1px solid #767676;
+	padding-bottom: 0.2em;
+}
+
+section.help hgroup p, section.help hgroup ul, section.help hgroup ol, section.help hgroup table {
+	margin-left: 3em;
+}
+
+section.help hgroup table {
+	border: 1px solid #767676;
+	border-spacing: 0;
+	border-collapse: collapse;
+}
+
+section.help hgroup table td, section.help hgroup table th {
+	border: 1px solid #767676;
+	padding: 0.2em 0.5em;
+	vertical-align: middle;
+}
+
+section.help hgroup table th {
+	font-weight: bold;
+	white-space: nowrap;
+	vertical-align: bottom;
+}
+
+section.help hgroup p span.note {
+	font-size: 0.8em;
+	font-style: italic;
+}
+
+footer.footer {
+	border-top: 1px solid #767676;
+	font-size: 0.8em;
+	text-align: center;
+	color: #767676;
+}
+
+footer.footer p {
+	margin: 0.5em 0;
+}
+
+footer.footer a.github {
+	padding-left: 1.4em;
+	background-repeat: no-repeat;
+	background-position: left center;
+	background-size: contain;
+	background-image: url("images/github.svg");
+}

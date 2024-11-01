@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>WCH RISC-V Microcontroller Web Serial ISP</title>
+	<link href="style.css" rel="stylesheet" />
+	<link href="images/check-small.svg" rel="preload" as="image" />
+	<link href="images/cross-small.svg" rel="preload" as="image" />
+	<link href="images/check-green.svg" rel="preload" as="image" />
+	<link href="images/cross-red.svg" rel="preload" as="image" />
+	<link href="modules/packet.js" rel="modulepreload" />
+	<link href="modules/command.js" rel="modulepreload" />
+	<link href="modules/response.js" rel="modulepreload" />
+	<link href="modules/transceiver.js" rel="modulepreload" />
+	<link href="modules/parsers/intelhex.js" rel="modulepreload" />
+	<link href="modules/parsers/srecord.js" rel="modulepreload" />
+	<link href="modules/parsers/elf.js" rel="modulepreload" />
+	<link href="modules/firmware.js" rel="modulepreload" />
+	<link href="modules/session.js" rel="modulepreload" />
+	<link href="modules/logger.js" rel="modulepreload" />
+	<link href="modules/util.js" rel="modulepreload" />
+	<link href="modules/devices.js" rel="modulepreload" />
+	<script type="module" src="wchisp.js"></script>
+</head>
+<body>
+	<main>
+		<h1>WCH RISC-V Microcontroller Web Serial ISP</h1>
+		
+		<div id="unsupported">
+			<p>Your browser does not appear to support the Web Serial API</p>
+			<p>
+				Currently, only the following browsers feature support:<br />
+				Chrome (v89+), Edge (v89+), Opera (v76+)
+			</p>
+		</div>
+
+		<script>
+			if("serial" in navigator) {
+				document.getElementById("unsupported").classList.add("hidden");
+			}
+		</script>
+		
+		<form id="form">
+			<section>
+				<h2>Device</h2>
+				<p><select id="device_list"></select></p>
+			</section>
+			
+			<section>
+				<h2>Firmware File</h2>
+				<p class="fw_ctrls">
+					<input id="fw_file" type="file" accept=".bin,.hex,.ihx,.srec,.s19,.s28,.s37,.elf" />
+					<span class="fw_size"><span id="fw_size_val">0</span> bytes</span>
+				</p>
+				<div id="fw_hex" class="hex"></div>
+				<p>Choose file or drag-and-drop a file into area above. Supported formats are: Intel Hex, S-Record, ELF, raw binary.</p>
+			</section>
+			
+			<section>
+				<h2>Configuration Option Bytes</h2>
+				<table class="config">
+					<tr>
+						<td><label for="cfg_rdpr">RDPR:</label></td>
+						<td><input id="cfg_rdpr" type="text" size="4" maxlength="4" required pattern="(?:0[xX])?[0-9a-fA-F]{1,2}" /></td>
+						<td><label for="cfg_user">USER:</label></td>
+						<td><input id="cfg_user" type="text" size="4" maxlength="4" required pattern="(?:0[xX])?[0-9a-fA-F]{1,2}" /></td>
+						<td><label for="cfg_data0">DATA0:</label></td>
+						<td><input id="cfg_data0" type="text" size="4" maxlength="4" required pattern="(?:0[xX])?[0-9a-fA-F]{1,2}" /></td>
+						<td><label for="cfg_data1">DATA1:</label></td>
+						<td><input id="cfg_data1" type="text" size="4" maxlength="4" required pattern="(?:0[xX])?[0-9a-fA-F]{1,2}" /></td>
+					</tr>
+					<tr>
+						<td><label for="cfg_wrpr0">WRPR0:</label></td>
+						<td><input id="cfg_wrpr0" type="text" size="4" maxlength="4" required pattern="(?:0[xX])?[0-9a-fA-F]{1,2}" /></td>
+						<td><label for="cfg_wrpr1">WRPR1:</label></td>
+						<td><input id="cfg_wrpr1" type="text" size="4" maxlength="4" required pattern="(?:0[xX])?[0-9a-fA-F]{1,2}" /></td>
+						<td><label for="cfg_wrpr2">WRPR2:</label></td>
+						<td><input id="cfg_wrpr2" type="text" size="4" maxlength="4" required pattern="(?:0[xX])?[0-9a-fA-F]{1,2}" /></td>
+						<td><label for="cfg_wrpr3">WRPR3:</label></td>
+						<td><input id="cfg_wrpr3" type="text" size="4" maxlength="4" required pattern="(?:0[xX])?[0-9a-fA-F]{1,2}" /></td>
+					</tr>
+				</table>
+				<p>Enter values in hexadecimal. See device reference manual for interpretation and appropriate values.</p>
+			</section>
+
+			<section>
+				<h2>Actions</h2>
+				<p id="actions">
+					<button id="config_read" type="button">Read Config</button>
+					<button id="config_write" type="button" disabled>Write Config</button>
+					<button id="flash_write" type="button" disabled>Flash Write</button>
+					<button id="flash_verify" type="button" disabled>Flash Verify</button>
+					<button id="flash_erase" type="button">Flash Erase</button>
+				</p>
+			</section>
+			
+			<section>
+				<h2>Progress</h2>
+				<p class="progress">
+					<span id="progress_result"></span>
+					<progress id="progress_bar" value="0"></progress>
+					<span id="progress_pct">0%</span>
+				</p>
+			</section>
+			
+			<section>
+				<h2>Log</h2>
+				<div id="log"></div>
+				<p class="log_ctrls">
+					<button id="log_clear" type="button">Clear Log</button>
+					<label for="log_debug">
+						<input id="log_debug" type="checkbox" checked />
+						Show debug output
+					</label>
+				</p>
+			</section>
+		</form>
+		
+		<section id="help" class="help">
+			<h2>Help / FAQ</h2>
+			
+			<hgroup>
+				<h3>How do I get my device to run the bootloader?</h3>
+				<p>Methods vary between device families. Bootloader entry at reset is typically controlled by the state of one or more pins. Consult table below, or see your device's documentation.</p>
+				<table>
+					<thead>
+						<tr>
+							<th>Device Family</th>
+							<th>Control Pins<sup>1</sup></th>
+							<th>UART Pins<sup>2</sup></th>
+							<th>Notes</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>CH32V003</td>
+							<td>N/A</td>
+							<td>TX = PD5,<br />RX = PD6</td>
+							<td>User application code must instruct device to enter the bootloader via <code>FLASH_STATR.MODE</code> flag and software reset.</td>
+						</tr>
+						<tr>
+							<td>CH32L103</td>
+							<td>BOOT0 = 1,<br />BOOT1 = 0</td>
+							<td>[TBC]</td>
+							<td></td>
+						</tr>
+						<tr>
+							<td>CH32V103</td>
+							<td>BOOT0 = 1,<br />BOOT1 = 0</td>
+							<td>TX = PA9,<br />RX = PA10</td>
+							<td></td>
+						</tr>
+						<tr>
+							<td>CH32V20x</td>
+							<td>BOOT0 = 1,<br />BOOT1 = 0</td>
+							<td>[TBC]</td>
+							<td></td>
+						</tr>
+						<tr>
+							<td>CH32V30x</td>
+							<td>BOOT0 = 1,<br />BOOT1 = 0</td>
+							<td>TX = PA9,<br />RX = PA10</td>
+							<td></td>
+						</tr>
+						<tr>
+							<td>CH32X03x</td>
+							<td>PC16 = 0,<br />PC17 = 1</td>
+							<td>TX = PA2,<br />RX = PA3</td>
+							<td>Bootloader can only be entered from power-on reset?</td>
+						</tr>
+					</tbody>
+				</table>
+				<p>
+					<span class="note">1. '0' indicates logic-low voltage level, '1' indicates logic-high voltage level.</span><br />
+					<span class="note">2. 'TX' is transmit output from the device, 'RX' is receive input to the device.</span><br />
+				</p>
+				<p>For devices with BOOT0 and BOOT1 control pins, some package variants may have BOOT1 internally tied to GND, with only BOOT0 exposed. Other packages may not have either pin exposed, with BOOT0 tied internally to GND, effectively rendering the bootloader unusable.</p>
+			</hgroup>
+			
+			<hgroup>
+				<h3>Why is my loaded firmware larger than it should be?</h3>
+				<p>When a firmware file is loaded it is padded to the next 1,024 byte boundary. For example, a 4,835 byte firmware will be padded to 5,120 bytes.</p>
+				<p>Due to the nature of flash memory, before it can be written, an area corresponding to the size of data to be written must first be erased. However, the WCH factory bootloader only performs erasure on sizes that are multiples of 1,024 bytes. Therefore, the firmware is padded to meet the bounds of the erased area.</p>
+				<p>Padding is done with 0xFF bytes.</p>
+			</hgroup>
+			
+			<hgroup>
+				<h3>I tried to load a firmware file, but I get a maximum size exceeded error.</h3>
+				<p>You may have loaded an Intel Hex or S-Record file that specifies the firmware image to be loaded at an address of 0x8000000 and onwards. Because this tool expects addressing to be relative, not absolute, such a file will cause it to first try and fill the range from 0x0 to 0x7FFFFFF with blank data before processing the file's data. Because that amount of data is larger than the maximum (512 KiB), an error occurs.</p>
+				<p>Your firmware image should instead be based at 0x0, using relative addressing, not absolute.</p>
+			</hgroup>
+			
+			<hgroup>
+				<h3>Why do I get a warning in the log about the reported device variant not matching the selected device?</h3>
+				<p>The specific device you have selected does not exactly match the one you are talking to.</p>
+				<p>Ensure you have selected the correct package variant for the device in question. For example, if you are using an 8-pin CH32V003J4M6, but have 20-pin CH32V003F4P6 selected, you will get this warning.</p>
+				<p>Ignoring this warning may be detrimental, due to some device families not having identical flash sizes for all their variants.</p>
+			</hgroup>
+			
+			<hgroup>
+				<h3>I loaded a firmware file, but the button to write to flash is disabled.</h3>
+				<p>The size of the firmware is too large for the currently selected device. You will have been warned about this when loading the firmware file.</p>
+				<p>Make sure you select the correct device variant. Some families do not have an identical flash size for all their devices.</p>
+				<p>A warning is also issued if you subsequently change device to one too small after having loaded a firmware file.</p>
+			</hgroup>
+			
+			<hgroup>
+				<h3>I tried to load an ELF firmware file, but I get a parse failure error.</h3>
+				<p>Please ensure your ELF file is of a suitable format. The ELF file must meet the following requirements:</p>
+				<ul>
+					<li>32-bit (64-bit is unsupported)</li>
+					<li>Little-endian format (parsing of big-endian is unsupported)</li>
+					<li>RISC-V architecture (other architectures unsupported)</li>
+				</ul>
+				<p>The cause may be that your firmware has been compiled using incorrect settings.</p>
+			</hgroup>
+			
+			<hgroup>
+				<h3>I disabled read-protection by changing RDPR to 0xA5 and then writing the new config. Why does my microcontroller now no longer work?</h3>
+				<p>Because your flash memory got erased!</p>
+				<p>When the RDPR option byte is changed to un-protected (value 0xA5) from previously protected (any other value), the microcontroller will automatically perform a full erasure of the user application flash memory.</p>
+			</hgroup>
+			
+			<hgroup>
+				<h3>Why is there no option to read flash?</h3>
+				<p>The WCH bootloader does not support reading out the contents of flash &mdash; there is no command in the protocol to accomplish that.</p>
+			</hgroup>
+			
+			<hgroup>
+				<h3>Does my firmware data get uploaded to or saved on the server?</h3>
+				<p>No. Although it is hosted on a web server, this tool runs locally in your web browser, and any firmware file you load never leaves your computer, nor is it retained anywhere.</p>
+			</hgroup>
+			
+			<hgroup>
+				<h3>The device I want to program is not listed.</h3>
+				<p>If your device's factory bootloader supports serial UART communication, then you can request it to be added by opening a new Issue on the <a href="https://github.com/basilhussain/" target="_blank">GitHub repository</a>.</p>
+			</hgroup>
+		</section>
+		
+		<footer class="footer">
+			<p>Copyright &copy; 2024 Basil Hussain.</p>
+			<p>No frameworks, no libraries, no BS &mdash; just plain JavaScript. Code on <a href="https://github.com/basilhussain/" target="_blank" class="github">GitHub</a>.</p>
+			<p>For more about the WCH bootloader serial protocol, see <a href="https://github.com/basilhussain/ch32v003-bootloader-docs" target="_blank" class="github">CH32V003 Factory Bootloader - The Missing Manual</a>.</p>
+		</footer>
+	</main>
+</body>
+</html>

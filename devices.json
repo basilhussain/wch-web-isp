@@ -1,0 +1,630 @@
+[
+	{
+		"family": "CH32V003",
+		"devices": [
+			{
+				"name": "CH32V003F4P6",
+				"package": "TSSOP20",
+				"type": 33,
+				"variant": 48,
+				"flash": {
+					"size": 16384,
+					"page_size": 64,
+					"page_count": 256,
+					"sector_size": 1024,
+					"sector_count": 16
+				}
+			},
+			{
+				"name": "CH32V003F4U6",
+				"package": "QFN20",
+				"type": 33,
+				"variant": 49,
+				"flash": {
+					"size": 16384,
+					"page_size": 64,
+					"page_count": 256,
+					"sector_size": 1024,
+					"sector_count": 16
+				}
+			},
+			{
+				"name": "CH32V003A4M6",
+				"package": "SOP16",
+				"type": 33,
+				"variant": 50,
+				"flash": {
+					"size": 16384,
+					"page_size": 64,
+					"page_count": 256,
+					"sector_size": 1024,
+					"sector_count": 16
+				}
+			},
+			{
+				"name": "CH32V003J4M6",
+				"package": "SOP8",
+				"type": 33,
+				"variant": 51,
+				"flash": {
+					"size": 16384,
+					"page_size": 64,
+					"page_count": 256,
+					"sector_size": 1024,
+					"sector_count": 16
+				}
+			}
+		]
+	},
+	{
+		"family": "CH32L103",
+		"devices": [
+			{
+				"name": "CH32L103C8T6",
+				"package": "LQFP48",
+				"type": 37,
+				"variant": 49,
+				"flash": {
+					"size": 65536,
+					"page_size": 256,
+					"page_count": 256,
+					"sector_size": 1024,
+					"sector_count": 64
+				}
+			},
+			{
+				"name": "CH32L103F8P6",
+				"package": "TSSOP20",
+				"type": 37,
+				"variant": 58,
+				"flash": {
+					"size": 65536,
+					"page_size": 256,
+					"page_count": 256,
+					"sector_size": 1024,
+					"sector_count": 64
+				}
+			},
+			{
+				"name": "CH32L103F8U6",
+				"package": "QFN20",
+				"type": 37,
+				"variant": 61,
+				"flash": {
+					"size": 65536,
+					"page_size": 256,
+					"page_count": 256,
+					"sector_size": 1024,
+					"sector_count": 64
+				}
+			},
+			{
+				"name": "CH32L103G8R6",
+				"package": "QSOP28",
+				"type": 37,
+				"variant": 59,
+				"flash": {
+					"size": 65536,
+					"page_size": 256,
+					"page_count": 256,
+					"sector_size": 1024,
+					"sector_count": 64
+				}
+			},
+			{
+				"name": "CH32L103K8U6",
+				"package": "QFN32",
+				"type": 37,
+				"variant": 50,
+				"flash": {
+					"size": 65536,
+					"page_size": 256,
+					"page_count": 256,
+					"sector_size": 1024,
+					"sector_count": 64
+				}
+			}
+		]
+	},
+	{
+		"family": "CH32V103",
+		"devices": [
+			{
+				"name": "CH32V103C6T6",
+				"package": "LQFP48",
+				"type": 21,
+				"variant": 50,
+				"flash": {
+					"size": 32768,
+					"page_size": 128,
+					"page_count": 256,
+					"sector_size": 1024,
+					"sector_count": 32
+				}
+			},
+			{
+				"name": "CH32V103C8T6",
+				"package": "LQFP48",
+				"type": 21,
+				"variant": 63,
+				"flash": {
+					"size": 65536,
+					"page_size": 128,
+					"page_count": 512,
+					"sector_size": 1024,
+					"sector_count": 64
+				}
+			},
+			{
+				"name": "CH32V103C8U6",
+				"package": "QFN48",
+				"type": 21,
+				"variant": 63,
+				"flash": {
+					"size": 65536,
+					"page_size": 128,
+					"page_count": 512,
+					"sector_size": 1024,
+					"sector_count": 64
+				}
+			},
+			{
+				"name": "CH32V103R8T6",
+				"package": "LQFP64M",
+				"type": 21,
+				"variant": 63,
+				"flash": {
+					"size": 65536,
+					"page_size": 128,
+					"page_count": 512,
+					"sector_size": 1024,
+					"sector_count": 64
+				}
+			}
+		]
+	},
+	{
+		"family": "CH32V20x",
+		"devices": [
+			{
+				"name": "CH32V203C6T6",
+				"package": "LQFP48",
+				"type": 25,
+				"variant": 51,
+				"flash": {
+					"size": 32768,
+					"page_size": 256,
+					"page_count": 128,
+					"sector_size": 4096,
+					"sector_count": 8
+				}
+			},
+			{
+				"name": "CH32V203C8T6",
+				"package": "LQFP48",
+				"type": 25,
+				"variant": 49,
+				"flash": {
+					"size": 65536,
+					"page_size": 256,
+					"page_count": 256,
+					"sector_size": 4096,
+					"sector_count": 16
+				}
+			},
+			{
+				"name": "CH32V203C8U6",
+				"package": "QFN48",
+				"type": 25,
+				"variant": 48,
+				"flash": {
+					"size": 65536,
+					"page_size": 256,
+					"page_count": 256,
+					"sector_size": 4096,
+					"sector_count": 16
+				}
+			},
+			{
+				"name": "CH32V203F6P6",
+				"package": "TSSOP20",
+				"type": 25,
+				"variant": 55,
+				"flash": {
+					"size": 32768,
+					"page_size": 256,
+					"page_count": 128,
+					"sector_size": 4096,
+					"sector_count": 8
+				}
+			},
+			{
+				"name": "CH32V203F8P6",
+				"package": "TSSOP20",
+				"type": 25,
+				"variant": 58,
+				"flash": {
+					"size": 65536,
+					"page_size": 256,
+					"page_count": 256,
+					"sector_size": 4096,
+					"sector_count": 16
+				}
+			},
+			{
+				"name": "CH32V203F8U6",
+				"package": "QFN20",
+				"type": 25,
+				"variant": 62,
+				"flash": {
+					"size": 65536,
+					"page_size": 256,
+					"page_count": 256,
+					"sector_size": 4096,
+					"sector_count": 16
+				}
+			},
+			{
+				"name": "CH32V203G6U6",
+				"package": "QFN28",
+				"type": 25,
+				"variant": 54,
+				"flash": {
+					"size": 32768,
+					"page_size": 256,
+					"page_count": 128,
+					"sector_size": 4096,
+					"sector_count": 8
+				}
+			},
+			{
+				"name": "CH32V203G8R6",
+				"package": "QSOP28",
+				"type": 25,
+				"variant": 59,
+				"flash": {
+					"size": 65536,
+					"page_size": 256,
+					"page_count": 256,
+					"sector_size": 4096,
+					"sector_count": 16
+				}
+			},
+			{
+				"name": "CH32V203K6T6",
+				"package": "LQFP32",
+				"type": 25,
+				"variant": 53,
+				"flash": {
+					"size": 32768,
+					"page_size": 256,
+					"page_count": 128,
+					"sector_size": 4096,
+					"sector_count": 8
+				}
+			},
+			{
+				"name": "CH32V203K8T6",
+				"package": "LQFP32",
+				"type": 25,
+				"variant": 50,
+				"flash": {
+					"size": 65536,
+					"page_size": 256,
+					"page_count": 256,
+					"sector_size": 4096,
+					"sector_count": 16
+				}
+			},
+			{
+				"name": "CH32V203RBT6",
+				"package": "LQFP64M",
+				"type": 25,
+				"variant": 52,
+				"flash": {
+					"size": 131072,
+					"page_size": 256,
+					"page_count": 512,
+					"sector_size": 4096,
+					"sector_count": 32
+				}
+			},
+			{
+				"name": "CH32V208CBU6",
+				"package": "QFN48",
+				"type": 25,
+				"variant": 130,
+				"flash": {
+					"size": 131072,
+					"page_size": 256,
+					"page_count": 512,
+					"sector_size": 4096,
+					"sector_count": 32
+				}
+			},
+			{
+				"name": "CH32V208GBU6",
+				"package": "QFN28",
+				"type": 25,
+				"variant": 131,
+				"flash": {
+					"size": 131072,
+					"page_size": 256,
+					"page_count": 512,
+					"sector_size": 4096,
+					"sector_count": 32
+				}
+			},
+			{
+				"name": "CH32V208RBT6",
+				"package": "LQFP64M",
+				"type": 25,
+				"variant": 129,
+				"flash": {
+					"size": 131072,
+					"page_size": 256,
+					"page_count": 512,
+					"sector_size": 4096,
+					"sector_count": 32
+				}
+			},
+			{
+				"name": "CH32V208WBU6",
+				"package": "QFN68",
+				"type": 25,
+				"variant": 128,
+				"flash": {
+					"size": 131072,
+					"page_size": 256,
+					"page_count": 512,
+					"sector_size": 4096,
+					"sector_count": 32
+				}
+			}
+		]
+	},
+	{
+		"family": "CH32V30x",
+		"devices": [
+			{
+				"name": "CH32V303CBT6",
+				"package": "LQFP48",
+				"type": 23,
+				"variant": 51,
+				"flash": {
+					"size": 131072,
+					"page_size": 256,
+					"page_count": 512,
+					"sector_size": 4096,
+					"sector_count": 32
+				}
+			},
+			{
+				"name": "CH32V303RBT6",
+				"package": "LQFP64M",
+				"type": 23,
+				"variant": 50,
+				"flash": {
+					"size": 131072,
+					"page_size": 256,
+					"page_count": 512,
+					"sector_size": 4096,
+					"sector_count": 32
+				}
+			},
+			{
+				"name": "CH32V303RCT6",
+				"package": "LQFP64M",
+				"type": 23,
+				"variant": 49,
+				"flash": {
+					"size": 262144,
+					"page_size": 256,
+					"page_count": 1024,
+					"sector_size": 4096,
+					"sector_count": 64
+				}
+			},
+			{
+				"name": "CH32V303VCT6",
+				"package": "LQFP100",
+				"type": 23,
+				"variant": 48,
+				"flash": {
+					"size": 262144,
+					"page_size": 256,
+					"page_count": 1024,
+					"sector_size": 4096,
+					"sector_count": 64
+				}
+			},
+			{
+				"name": "CH32V305FBP6",
+				"package": "TSSOP20",
+				"type": 23,
+				"variant": 82,
+				"flash": {
+					"size": 131072,
+					"page_size": 256,
+					"page_count": 512,
+					"sector_size": 4096,
+					"sector_count": 32
+				}
+			},
+			{
+				"name": "CH32V305GBU6",
+				"package": "QFN28",
+				"type": 23,
+				"variant": 91,
+				"flash": {
+					"size": 131072,
+					"page_size": 256,
+					"page_count": 512,
+					"sector_size": 4096,
+					"sector_count": 32
+				}
+			},
+			{
+				"name": "CH32V305RBT6",
+				"package": "LQFP64M",
+				"type": 23,
+				"variant": 80,
+				"flash": {
+					"size": 131072,
+					"page_size": 256,
+					"page_count": 512,
+					"sector_size": 4096,
+					"sector_count": 32
+				}
+			},
+			{
+				"name": "CH32V307FBP6",
+				"package": "TSSOP20",
+				"type": 23,
+				"variant": 114,
+				"flash": {
+					"size": 131072,
+					"page_size": 256,
+					"page_count": 512,
+					"sector_size": 4096,
+					"sector_count": 32
+				}
+			},
+			{
+				"name": "CH32V307RCT6",
+				"package": "LQFP64M",
+				"type": 23,
+				"variant": 113,
+				"flash": {
+					"size": 262144,
+					"page_size": 256,
+					"page_count": 1024,
+					"sector_size": 4096,
+					"sector_count": 64
+				}
+			},
+			{
+				"name": "CH32V307WCU6",
+				"package": "QFN68",
+				"type": 23,
+				"variant": 115,
+				"flash": {
+					"size": 262144,
+					"page_size": 256,
+					"page_count": 1024,
+					"sector_size": 4096,
+					"sector_count": 64
+				}
+			},
+			{
+				"name": "CH32V307VCT6",
+				"package": "LQFP100",
+				"type": 23,
+				"variant": 112,
+				"flash": {
+					"size": 262144,
+					"page_size": 256,
+					"page_count": 1024,
+					"sector_size": 4096,
+					"sector_count": 64
+				}
+			}
+		]
+	},
+	{
+		"family": "CH32X03x",
+		"devices": [
+			{
+				"name": "CH32X033F8P6",
+				"package": "TSSOP20",
+				"type": 35,
+				"variant": 90,
+				"flash": {
+					"size": 63488,
+					"page_size": 256,
+					"page_count": 248,
+					"sector_size": 1024,
+					"sector_count": 62
+				}
+			},
+			{
+				"name": "CH32X035C8T6",
+				"package": "LQFP48",
+				"type": 35,
+				"variant": 81,
+				"flash": {
+					"size": 63488,
+					"page_size": 256,
+					"page_count": 248,
+					"sector_size": 1024,
+					"sector_count": 62
+				}
+			},
+			{
+				"name": "CH32X035F7P6",
+				"package": "TSSOP20",
+				"type": 35,
+				"variant": 87,
+				"flash": {
+					"size": 63488,
+					"page_size": 256,
+					"page_count": 248,
+					"sector_size": 1024,
+					"sector_count": 62
+				}
+			},
+			{
+				"name": "CH32X035F8U6",
+				"package": "QFN20",
+				"type": 35,
+				"variant": 94,
+				"flash": {
+					"size": 63488,
+					"page_size": 256,
+					"page_count": 248,
+					"sector_size": 1024,
+					"sector_count": 62
+				}
+			},
+			{
+				"name": "CH32X035G8R6",
+				"package": "QSOP28",
+				"type": 35,
+				"variant": 91,
+				"flash": {
+					"size": 63488,
+					"page_size": 256,
+					"page_count": 248,
+					"sector_size": 1024,
+					"sector_count": 62
+				}
+			},
+			{
+				"name": "CH32X035G8U6",
+				"package": "QFN28",
+				"type": 35,
+				"variant": 86,
+				"flash": {
+					"size": 63488,
+					"page_size": 256,
+					"page_count": 248,
+					"sector_size": 1024,
+					"sector_count": 62
+				}
+			},
+			{
+				"name": "CH32X035R8T6",
+				"package": "LQFP64M",
+				"type": 35,
+				"variant": 80,
+				"flash": {
+					"size": 63488,
+					"page_size": 256,
+					"page_count": 248,
+					"sector_size": 1024,
+					"sector_count": 62
+				}
+			}
+		]
+	}
+]
