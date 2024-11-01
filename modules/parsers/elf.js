@@ -1,3 +1,23 @@
+/*******************************************************************************
+ *
+ * WCH RISC-V Microcontroller Web Serial ISP
+ * Copyright (c) 2024 Basil Hussain
+ * 
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
+ * 
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+ * details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ * 
+ ******************************************************************************/
+
 const ELF_MAGIC = 0x7F454C46; // 0x7F, 'E', 'L', 'F'
 const ELF_CLASS_32BIT = 0x1;
 const ELF_DATA_LITTLE_ENDIAN = 0x1;
