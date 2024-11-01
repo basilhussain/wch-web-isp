@@ -31,7 +31,7 @@ export class Firmware {
 		this.#file = file;
 		this.#maxSize = maxSize;
 		const nameDotPos = file.name.lastIndexOf(".");
-		this.#extension = (nameDotPos >= 0 ? file.name.slice(nameDotPos + 1) : "");
+		this.#extension = (nameDotPos >= 0 ? file.name.slice(nameDotPos + 1).toLowerCase() : "");
 		this.#format = "Unknown";
 	}
 	
@@ -103,7 +103,7 @@ export class Firmware {
 	
 	static addParser(extensions, parser) {
 		for(const ext of extensions) {
-			this.#parsers.set(ext, parser);
+			this.#parsers.set(ext.trim().toLowerCase(), parser);
 		}
 	}
 }
