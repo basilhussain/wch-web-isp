@@ -240,7 +240,7 @@ Promise.all([contentLoaded, devicesLoaded])
 		fwFile.addEventListener("change", (event) => {
 			if(fwFile.files.length > 0) {
 				clearHexListing();
-				fw = new Firmware(fwFile.files[0], 524288); // Max 512K
+				fw = new Firmware(fwFile.files[0], fwFile.files[0].name, 524288); // Max 512K
 				fw.parse()
 					.then(() => {
 						logger.info("Successfully loaded " + fw.format + " file \"" + fw.fileName + "\"");

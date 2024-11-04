@@ -21,22 +21,24 @@
 export class Firmware {
 	static #parsers = new Map();
 	
-	#file;
-	#maxSize;
+	#blob;
+	#name;
 	#extension;
 	#bytes;
 	#format;
+	#maxSize;
 	
-	constructor(file, maxSize = 1048576) {
-		this.#file = file;
-		this.#maxSize = maxSize;
-		const nameDotPos = file.name.lastIndexOf(".");
-		this.#extension = (nameDotPos >= 0 ? file.name.slice(nameDotPos + 1).toLowerCase() : "");
+	constructor(blob, name, maxSize = 1048576) {
+		this.#blob = blob;
+		this.#name = name;
+		const nameDotPos = name.lastIndexOf(".");
+		this.#extension = (nameDotPos >= 0 ? name.slice(nameDotPos + 1).toLowerCase() : "");
 		this.#format = "Unknown";
+		this.#maxSize = maxSize;
 	}
 	
 	async parse() {
-		if(this.#file.size == 0) throw new Error("No data to parse; file is empty");
+		if(this.#blob.size == 0) throw new Error("No data to parse; file is empty");
 		
 		if(this.constructor.#parsers.has(this.#extension)) {
 			// We have a parser for the file extension, so use it on the
@@ -44,16 +46,16 @@ export class Firmware {
 			// the file as a string; otherwise read binary bytes.
 			const parser = this.constructor.#parsers.get(this.#extension);
 			if(parser.forText) {
-				const txt = await this.#file.text();
+				const txt = await this.#blob.text();
 				this.#bytes = parser.parse(txt, this.#maxSize);
 			} else {
-				const buf = await this.#file.arrayBuffer();
+				const buf = await this.#blob.arrayBuffer();
 				this.#bytes = parser.parse(buf, this.#maxSize);
 			}
 			this.#format = parser.formatName;
 		} else {
 			// No parser, just use the raw bytes of the file.
-			const buf = await this.#file.arrayBuffer();
+			const buf = await this.#blob.arrayBuffer();
 			this.#bytes = new Uint8Array(buf);
 			this.#format = "Raw Binary";
 		}
@@ -82,7 +84,7 @@ export class Firmware {
 	}
 	
 	get fileName() {
-		return this.#file.name;
+		return this.#name;
 	}
 	
 	get fileExtension() {
