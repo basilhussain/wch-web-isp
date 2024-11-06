@@ -20,16 +20,20 @@
 
 import { Formatter } from "./util.js";
 
-export class DevicesDatabase /*extends EventTarget*/ {
+export class DevicesDatabase {
 	#devices = [];
-	// #loaded = false;
 	
-	constructor() {
-		// super();
-	}
+	constructor() { }
 	
-	async fetchDevices(url) {
-		const response = await window.fetch(url, { headers: { "Accept": "application/json" } });
+	async fetchDevicesData(url) {
+		let response;
+		
+		try {
+			response = await window.fetch(url, { headers: { "Accept": "application/json" } });
+		} catch(err) {
+			throw new Error("Error fetching device JSON data from \"" + url + "\"", { cause: err });
+		}
+		
 		if(response.ok) {
 			try {
 				this.#devices = await response.json();
@@ -38,32 +42,11 @@ export class DevicesDatabase /*extends EventTarget*/ {
 			}
 		} else {
 			throw new Error(
-				"Error fetching device JSON data from \"" + response.url + "\"",
+				"Error fetching device JSON data from \"" + url + "\"",
 				{ cause: new Error("Server response: " + response.status + " " + response.statusText) }
 			);
 		}
 	}
-	
-	/*
-	fetchDevices(url) {
-		this.#devices = [];
-		this.#loaded = false;
-		
-		window.fetch(url, { headers: { "Accept": "application/json" } })
-			.then((response) => {
-				if(!response.ok) throw new Error("Error fetching \"" + response.url + "\"; " + response.status + " " + response.statusText);
-				return response.json();
-			})
-			.then((json) => {
-				this.#devices = json;
-				this.#loaded = true;
-				this.dispatchEvent(new CustomEvent("loaded"));
-			})
-			.catch((err) => {
-				this.dispatchEvent(new CustomEvent("error", { detail: err }));
-			});
-	}
-	*/
 
 	populateDeviceList(list) {
 		this.#devices.forEach((fam, famIdx) => {
@@ -81,25 +64,32 @@ export class DevicesDatabase /*extends EventTarget*/ {
 		});
 	}
 
-	findDevice(val) {
-		const indices = val.split(":").map((str) => Number.parseInt(str));
+	findDeviceByIndex(val) {
+		const [famIdx, devIdx] = val.split(":").map((str) => Number.parseInt(str));
 		
-		if(indices.length == 2) {
-			const family = this.#devices.at(indices[0]);
-			if(family instanceof Object) {
-				const device = family["devices"].at(indices[1]);
-				if(device instanceof Object) {
+		if(famIdx >= 0 && devIdx >= 0) {
+			const family = this.#devices.at(famIdx);
+			if(family) {
+				const device = family["devices"].at(devIdx);
+				if(device) {
 					return device;
 				}
 			}
 		}
 		
-		throw new Error("Device not found or invalid specifier string");
+		throw new Error("Device not found or invalid index string");
 	}
 	
-	/*
-	get loaded() {
-		return this.#loaded;
+	findDeviceIndexByName(name) {
+		name = name.trim().toLowerCase();
+		
+		let famIdx, devIdx;
+		
+		famIdx = this.#devices.findIndex((fam) => {
+			devIdx = fam["devices"].findIndex((dev) => dev["name"].toLowerCase() === name);
+			return (devIdx >= 0);
+		});
+		
+		return (famIdx >= 0 && devIdx >= 0 ? famIdx + ":" + devIdx : null);
 	}
-	*/
 }

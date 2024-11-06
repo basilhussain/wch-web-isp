@@ -48,15 +48,15 @@
 			
 			<section>
 				<h2>Firmware File</h2>
-				<p>Load from URL or local file, or drag-and-drop a file into area below.</p>
+				<p>Load from local file or URL, or drag-and-drop a file into area below.</p>
+				<p class="fw_ctrls">
+					<label for="fw_file">From File:</label>
+					<input id="fw_file" type="file" accept=".bin,.hex,.ihx,.srec,.s19,.s28,.s37,.elf" />
+				</p>
 				<p class="fw_ctrls">
 					<label for="fw_url">From URL:</label>
 					<input id="fw_url" type="url" />
 					<button id="fw_url_load" type="button" disabled>Load</button>
-				</p>
-				<p class="fw_ctrls">
-					<label for="fw_file">From File:</label>
-					<input id="fw_file" type="file" accept=".bin,.hex,.ihx,.srec,.s19,.s28,.s37,.elf" />
 				</p>
 				<p>Supported formats are: Intel Hex, S-Record, ELF, raw binary.</p>
 				<div id="fw_hex" class="hex"></div>

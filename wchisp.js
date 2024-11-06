@@ -215,10 +215,11 @@ Firmware.addParser(["elf"], ElfRiscVParser);
 
 const logger = new Logger(logMessage);
 const devices = new DevicesDatabase();
+const params = new URLSearchParams(window.location.search);
 
 // Create promises that resolve when devices JSON and DOM content have finished
 // loading.
-const devicesLoaded = devices.fetchDevices("devices.json");
+const devicesLoaded = devices.fetchDevicesData("devices.json");
 const contentLoaded = new Promise((resolve) => document.addEventListener("DOMContentLoaded", resolve, false));
 
 Promise.all([contentLoaded, devicesLoaded])
@@ -238,7 +239,7 @@ Promise.all([contentLoaded, devicesLoaded])
 		let device, firmware;
 		
 		devices.populateDeviceList(deviceList);
-		device = devices.findDevice(deviceList.value);
+		device = devices.findDeviceByIndex(deviceList.value);
 		
 		fwUrl.addEventListener("input", (event) => {
 			fwUrlLoad.disabled = !event.target.validity.valid;
@@ -308,7 +309,7 @@ Promise.all([contentLoaded, devicesLoaded])
 		});
 		
 		deviceList.addEventListener("change", (event) => {
-			device = devices.findDevice(deviceList.value);
+			device = devices.findDeviceByIndex(deviceList.value);
 			
 			logger.info(
 				"Selected device changed to: " +
@@ -455,6 +456,25 @@ Promise.all([contentLoaded, devicesLoaded])
 		logClear.addEventListener("click", (event) => {
 			clearLog();
 		});
+		
+		// When a device name was given in URL parameter, find it and
+		// automatically select it in the list.
+		if(params.has("dev")) {
+			const idx = devices.findDeviceIndexByName(params.get("dev"));
+			if(idx) {
+				deviceList.value = idx;
+				deviceList.dispatchEvent(new Event("change"));
+			} else {
+				throw new Error("Couldn't find device with name \"" + params.get("dev") + "\"");
+			}
+		}
+		
+		// When a firmware file URL was given in URL parameter, load it.
+		if(params.has("fw")) {
+			fwUrl.value = params.get("fw");
+			fwUrlLoad.disabled = false;
+			fwUrlLoad.dispatchEvent(new Event("click"));
+		}
 	})
 	.catch((err) => {
 		console.error(err);
