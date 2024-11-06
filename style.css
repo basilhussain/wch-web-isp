@@ -79,8 +79,17 @@ p.fw_ctrls {
 	justify-content: space-between;
 }
 
-p.fw_ctrls input[type="file"]#fw_file {
+p.fw_ctrls label {
+	margin-right: 0.5em;
+	white-space: nowrap;
+}
+
+p.fw_ctrls input[type="file"]#fw_file, p.fw_ctrls input[type="url"]#fw_url {
 	width: 100%;
+}
+
+p.fw_ctrls button#fw_url_load {
+	margin-left: 0.5em;
 }
 
 span.fw_size {

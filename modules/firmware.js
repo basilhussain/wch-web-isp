@@ -18,47 +18,23 @@
  * 
  ******************************************************************************/
 
+import { ContentDispositionDecoder } from "./util.js";
+
+const MAX_SIZE_BYTES = 1048576;
+
 export class Firmware {
 	static #parsers = new Map();
 	
-	#blob;
+	#bytes;
 	#name;
 	#extension;
-	#bytes;
 	#format;
-	#maxSize;
 	
-	constructor(blob, name, maxSize = 1048576) {
-		this.#blob = blob;
+	constructor(bytes, name, format) {
+		this.#bytes = bytes;
 		this.#name = name;
-		const nameDotPos = name.lastIndexOf(".");
-		this.#extension = (nameDotPos >= 0 ? name.slice(nameDotPos + 1).toLowerCase() : "");
-		this.#format = "Unknown";
-		this.#maxSize = maxSize;
-	}
-	
-	async parse() {
-		if(this.#blob.size == 0) throw new Error("No data to parse; file is empty");
-		
-		if(this.constructor.#parsers.has(this.#extension)) {
-			// We have a parser for the file extension, so use it on the
-			// contents of the file. If the parser is for text-based files, read
-			// the file as a string; otherwise read binary bytes.
-			const parser = this.constructor.#parsers.get(this.#extension);
-			if(parser.forText) {
-				const txt = await this.#blob.text();
-				this.#bytes = parser.parse(txt, this.#maxSize);
-			} else {
-				const buf = await this.#blob.arrayBuffer();
-				this.#bytes = parser.parse(buf, this.#maxSize);
-			}
-			this.#format = parser.formatName;
-		} else {
-			// No parser, just use the raw bytes of the file.
-			const buf = await this.#blob.arrayBuffer();
-			this.#bytes = new Uint8Array(buf);
-			this.#format = "Raw Binary";
-		}
+		this.#extension = this.constructor.#getFilenameExtension(name);
+		this.#format = format;
 	}
 	
 	fillToEndOfSegment(segmentSize, fillVal = 0xFF) {
@@ -107,5 +83,98 @@ export class Firmware {
 		for(const ext of extensions) {
 			this.#parsers.set(ext.trim().toLowerCase(), parser);
 		}
+	}
+	
+	static #getFilenameExtension(name) {
+		const nameDotPos = name.lastIndexOf(".");
+		return (nameDotPos >= 0 ? name.slice(nameDotPos + 1).toLowerCase() : "");
+	}
+	
+	static async #parseBlob(blob, name) {
+		if(blob.size == 0) throw new Error("No data to parse; file is empty");
+		
+		const extension = this.#getFilenameExtension(name);
+		let bytes, format;
+		
+		if(this.#parsers.has(extension)) {
+			// We have a parser for the file extension, so use it on the
+			// contents of the blob. If the parser is for text-based files, read
+			// the blob as a string; otherwise read binary bytes.
+			const parser = this.#parsers.get(extension);
+			if(parser.forText) {
+				bytes = parser.parse(await blob.text(), MAX_SIZE_BYTES);
+			} else {
+				bytes = parser.parse(await blob.arrayBuffer(), MAX_SIZE_BYTES);
+			}
+			format = parser.formatName;
+		} else {
+			// No parser, just use the raw bytes of the file.
+			if(blob.size > MAX_SIZE_BYTES) {
+				throw new Error("Maximum size of " + MAX_SIZE_BYTES.toLocaleString() + " bytes exceeded");
+			}
+			bytes = new Uint8Array(await blob.arrayBuffer());
+			format = "Raw Binary";
+		}
+		
+		return { bytes: bytes, format: format };
+	}
+	
+	static #getUrlResponseFilename(response) {
+		// First, try to extract a filename given in any Content-Disposition
+		// header present in the HTTP response.
+		if(response.headers.has("Content-Disposition")) {
+			return ContentDispositionDecoder.getFilename(response.headers.get("Content-Disposition"));
+		}
+		
+		// Otherwise, try to extract a filename from the last part of the URL
+		// path.
+		const url = new URL(response.url);
+		const slashPos = url.pathname.lastIndexOf("/");
+		if(url.pathname.length > 1 && slashPos >= 0) {
+			return url.pathname.slice(slashPos + 1);
+		}
+		
+		// Failing all the above, just return a default name.
+		return "[unknown]";
+	}
+	
+	static async fromFile(file) {
+		const { bytes, format } = await this.#parseBlob(file, file.name);
+		
+		return new this(bytes, file.name, format);
+	}
+	
+	static async fromUrl(urlStr) {
+		// See if the given URL string starts with a protocol. If not, then add
+		// "http://" prefix. If it does, but it's not HTTP, then error.
+		const protoMatch = urlStr.match(/^([a-z]+):\/\//i);
+		if(!protoMatch) {
+			urlStr = "http://" + urlStr;
+		} else if(protoMatch[1].toLowerCase() !== "http" && protoMatch[1].toLowerCase() !== "https") {
+			throw new Error("Loading from non-HTTP protocol URLs not supported");
+		}
+		
+		// Parse the given URL to check that it's actually valid.
+		const url = URL.parse(urlStr);
+		if(!url) throw new Error("URL \"" + urlStr + "\" is not valid");
+		
+		let response, blob, name;
+		
+		try {
+			response = await window.fetch(url);
+		} catch(err) {
+			throw new Error("Couldn't fetch from server", { cause: err });
+		}
+		
+		if(response.ok) {
+			name = this.#getUrlResponseFilename(response);
+			blob = await response.blob();
+		} else {
+			throw new Error("Server response: " + response.status + " " + response.statusText);
+		}
+		
+		const { bytes, format } = await this.#parseBlob(blob, name);
+		
+		return new this(bytes, name, format);
 	}
 }

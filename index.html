@@ -48,12 +48,22 @@
 			
 			<section>
 				<h2>Firmware File</h2>
+				<p>Load from URL or local file, or drag-and-drop a file into area below.</p>
 				<p class="fw_ctrls">
+					<label for="fw_url">From URL:</label>
+					<input id="fw_url" type="url" />
+					<button id="fw_url_load" type="button" disabled>Load</button>
+				</p>
+				<p class="fw_ctrls">
+					<label for="fw_file">From File:</label>
 					<input id="fw_file" type="file" accept=".bin,.hex,.ihx,.srec,.s19,.s28,.s37,.elf" />
+				</p>
+				<p>Supported formats are: Intel Hex, S-Record, ELF, raw binary.</p>
+				<div id="fw_hex" class="hex"></div>
+				<p class="fw_ctrls">
+					<span class="fw_name" id="fw_name_val"></span>
 					<span class="fw_size"><span id="fw_size_val">0</span> bytes</span>
 				</p>
-				<div id="fw_hex" class="hex"></div>
-				<p>Choose file or drag-and-drop a file into area above. Supported formats are: Intel Hex, S-Record, ELF, raw binary.</p>
 			</section>
 			
 			<section>
@@ -80,7 +90,7 @@
 						<td><input id="cfg_wrpr3" type="text" size="4" maxlength="4" required pattern="(?:0[xX])?[0-9a-fA-F]{1,2}" /></td>
 					</tr>
 				</table>
-				<p>Enter values in hexadecimal. See device reference manual for interpretation and appropriate values.</p>
+				<p>Values are in hexadecimal. See device reference manual for interpretation and appropriate values.</p>
 			</section>
 
 			<section>

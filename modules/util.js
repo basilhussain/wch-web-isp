@@ -64,3 +64,61 @@ export class Delay {
 		return new Promise((r) => setTimeout(r, ms));
 	}
 }
+
+export class ContentDispositionDecoder {
+	static #entityDecode(str) {
+		return new Uint8Array(
+			// Find all percent-hex-encoded values, or regular characters, and
+			// decode the hex digits to, or convert chars to, integers.
+			str
+				.match(/((?:%[0-9a-fA-F]{2})|.)/g)
+				.map((val) => val.startsWith("%") ? parseInt(val.slice(-2), 16) : val.charCodeAt(0))
+		);
+	}
+	
+	static #getFilenameParam(str) {
+		let name = null;
+		
+		// Look for a filename parameter with either a quoted or plain name.
+		// Capture two groups: first will be quoted name, or second will be
+		// plain name.
+		const match = str.match(/filename=(?:"((?:[^"]|\\")+)"|([^ ]+))(?:;|$)/);
+		
+		if(match) {
+			if(match[1]) {
+				// For a quoted name, replace all backslash-escaped characters
+				// with the plain character.
+				name = match[1].replaceAll(/\\(.)/g, "$1");
+			} else if(match[2]) {
+				name = match[2];
+			}
+		}
+		
+		return name;
+	}
+	
+	static #getEncodedFilenameParam(str) {
+		let name = null;
+		
+		// Look for a filename parameter encoded according to RFC5987, section
+		// 3.2 - with charset, optional language, and entity-encoded name.
+		// Capture three groups, one for each of the aforementioned values.
+		const match = str.match(/filename\*=([\w-]+)'([\w-]*)'(.+?)(?:;|$)/);
+		
+		if(match && match[1] && match[3]) {
+			// Decode the name using the given charset.
+			const bytes = this.#entityDecode(match[3]);
+			name = new TextDecoder(match[1]).decode(bytes);
+		}
+		
+		return name;
+	}
+	
+	static getFilename(value) {
+		// In order of priority, return either:
+		// 1. an encoded "filename*=" parameter, or;
+		// 2. a plain or quoted-string "filename=" parameter, or;
+		// 3. a default name if neither of the above could be found.
+		return this.#getEncodedFilenameParam(value) || this.#getFilenameParam(value) || "[unknown]";
+	}
+}
