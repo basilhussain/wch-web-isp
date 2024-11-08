@@ -49,18 +49,24 @@
 			<section>
 				<h2>Firmware File</h2>
 				<p>Load from local file or URL, or drag-and-drop a file into area below.</p>
-				<p class="fw_ctrls">
-					<label for="fw_file">From File:</label>
-					<input id="fw_file" type="file" accept=".bin,.hex,.ihx,.srec,.s19,.s28,.s37,.elf" />
-				</p>
-				<p class="fw_ctrls">
-					<label for="fw_url">From URL:</label>
-					<input id="fw_url" type="url" required />
-					<button id="fw_url_load" type="button" disabled>Load</button>
-				</p>
+				<div class="fw_tabs">
+					<input type="radio" name="fw_tabs" id="fw_tab_file" checked />
+					<label for="fw_tab_file">Local File</label>
+					<input type="radio" name="fw_tabs" id="fw_tab_url" />
+					<label for="fw_tab_url">URL</label>
+					<div class="fw_tab_panels">
+						<div class="fw_tab_panel" id="fw_tab_panel_file">
+							<input id="fw_file" type="file" accept=".bin,.hex,.ihx,.srec,.s19,.s28,.s37,.elf" />
+						</div>
+						<div class="fw_tab_panel" id="fw_tab_panel_url">
+							<input id="fw_url" type="url" required placeholder="Enter URL" />
+							<button id="fw_url_load" type="button" disabled>Load</button>
+						</div>
+					</div>
+				</div>
 				<p>Supported formats are: Intel Hex, S-Record, ELF, raw binary.</p>
 				<div id="fw_hex" class="hex"></div>
-				<p class="fw_ctrls">
+				<p class="fw_info">
 					<span class="fw_name" id="fw_name_val"></span>
 					<span class="fw_size"><span id="fw_size_val">0</span> bytes</span>
 				</p>
@@ -215,17 +221,6 @@
 			</hgroup>
 			
 			<hgroup>
-				<h3>I tried to load an ELF firmware file, but I get a parse failure error.</h3>
-				<p>Please ensure your ELF file is of a suitable format. The ELF file must meet the following requirements:</p>
-				<ul>
-					<li>32-bit (64-bit is unsupported)</li>
-					<li>Little-endian format (parsing of big-endian is unsupported)</li>
-					<li>RISC-V architecture (other architectures unsupported)</li>
-				</ul>
-				<p>The cause may be that your firmware has been compiled using incorrect settings.</p>
-			</hgroup>
-			
-			<hgroup>
 				<h3>I disabled read-protection by changing RDPR to 0xA5 and then writing the new config. Why does my microcontroller now no longer work?</h3>
 				<p>Because your flash memory got erased!</p>
 				<p>When the RDPR option byte is changed to un-protected (value 0xA5) from previously protected (any other value), the microcontroller will automatically perform a full erasure of the user application flash memory.</p>
@@ -239,6 +234,16 @@
 			<hgroup>
 				<h3>Does my firmware data get uploaded to or saved on the server?</h3>
 				<p>No. Although it is hosted on a web server, this tool runs locally in your web browser, and any firmware file you load never leaves your computer, nor is it retained anywhere.</p>
+			</hgroup>
+			
+			<hgroup>
+				<h3>Can I create a link to here which auto-selects a device and/or auto-loads a firmware URL?</h3>
+				<p>Yes. A query string can be added to this page's URL to auto-select a device, auto-load a firmware file from an external URL, or both. Append a question-mark character (<code>?</code>) and then one or both of the following parameters:</p>
+				<ul>
+					<li><code>dev=<em>device</em></code> &mdash; replace 'device' with the full number of the desired part (e.g. <code>dev=CH32X035C8T6</code>). Device names specified this way are not case-sensitive.</li>
+					<li><code>fw=<em>url</em></code> &mdash; replace 'url' with the full <a href="https://en.wikipedia.org/wiki/Query_string#URL_encoding" target="_blank">entity-encoded</a> URL of the firmware file (e.g. <code>fw=http%3A%2F%2Fexample.com%2Ffirmware.hex</code>).</li>
+				</ul>
+				<p>Both parameters may be combined by separating them with an ampersand character (<code>&amp;</code>).
 			</hgroup>
 			
 			<hgroup>

@@ -63,6 +63,10 @@ input:focus, select:focus, button:focus {
 	outline-width: 3px;
 }
 
+button:hover {
+	background-color: #E2E2E2;
+}
+
 button:active {
 	background-color: #D8D8D8;
 }
@@ -72,27 +76,59 @@ button:disabled, select:disabled {
 	
 }
 
-p.fw_ctrls {
+div.fw_tabs > input[type="radio"] {
+	position: absolute;
+	left: -200vw;
+}
+
+div.fw_tabs > label {
+	display: inline-block;
+	cursor: pointer;
+	padding: 0.2em 0.5em;
+	border: 1px solid transparent;
+	border-radius: 0.5em 0.5em 0 0;
+	margin-bottom: -1px;
+}
+
+div.fw_tabs > input[type="radio"]:checked + label {
+	font-weight: bold;
+	border-color: #767676;
+	border-bottom: 1px solid white;
+}
+
+div.fw_tabs div.fw_tab_panels {
+	border: 1px solid #767676;
+	padding: 0.5em;
+}
+
+div.fw_tabs div.fw_tab_panel {
+	display: none;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+}
+
+div.fw_tabs > input[type="radio"]:nth-child(1):checked ~ div.fw_tab_panels > div.fw_tab_panel:nth-child(1),
+div.fw_tabs > input[type="radio"]:nth-child(3):checked ~ div.fw_tab_panels > div.fw_tab_panel:nth-child(2) {
+	display: flex;
+}
+
+div.fw_tabs input[type="file"]#fw_file, div.fw_tabs input[type="url"]#fw_url {
+	width: 100%;
+}
+
+div.fw_tabs button#fw_url_load {
+	margin-left: 0.5em;
+}
+
+p.fw_info {
 	display: flex;
 	flex-direction: row;
 	align-items: center;
 	justify-content: space-between;
 }
 
-p.fw_ctrls label {
-	margin-right: 0.5em;
-	white-space: nowrap;
-}
-
-p.fw_ctrls input[type="file"]#fw_file, p.fw_ctrls input[type="url"]#fw_url {
-	width: 100%;
-}
-
-p.fw_ctrls button#fw_url_load {
-	margin-left: 0.5em;
-}
-
-span.fw_size {
+p.fw_info span.fw_size {
 	margin-left: 0.5em;
 	white-space: nowrap;
 }

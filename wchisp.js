@@ -477,6 +477,7 @@ Promise.all([contentLoaded, devicesLoaded])
 		
 		// When a firmware file URL was given in URL parameter, load it.
 		if(params.has("fw")) {
+			document.getElementById("fw_tab_url").checked = true;
 			fwUrl.value = params.get("fw");
 			fwUrlLoad.disabled = false;
 			fwUrlLoad.dispatchEvent(new Event("click"));
