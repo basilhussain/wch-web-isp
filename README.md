@@ -8,6 +8,7 @@ It uses the JavaScript [Web Serial](https://developer.mozilla.org/en-US/docs/Web
 
 ## Features
 
+* Connect using any available serial port (e.g. COM/TTY) interface.
 * Write, verify, and erase user application flash.
 * Read and write configuration option bytes.
 * Loads firmware images in these formats:
@@ -15,8 +16,9 @@ It uses the JavaScript [Web Serial](https://developer.mozilla.org/en-US/docs/Web
   * S-Record
   * ELF
   * Raw binary
+* Load firmware from local file or external URL.
+* Can take query string parameters to auto-select device and/or auto-load firmware from URL.
 * Hex preview listing of loaded firmware image.
-* Connect using any available serial port interface (e.g. COM/TTY port).
 
 Currently supported RISC-V WCH microcontrollers:
 
