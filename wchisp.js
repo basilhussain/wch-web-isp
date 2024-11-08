@@ -245,6 +245,12 @@ Promise.all([contentLoaded, devicesLoaded])
 			fwUrlLoad.disabled = !event.target.validity.valid;
 		});
 		
+		fwUrl.addEventListener("keydown", (event) => {
+			if(event.key == "Enter" && event.target.validity.valid) {
+				fwUrlLoad.dispatchEvent(new Event("click"));
+			}
+		});
+		
 		fwUrlLoad.addEventListener("click", (event) => {
 			clearHexListing();
 			
