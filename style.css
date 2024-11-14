@@ -73,7 +73,6 @@ button:active {
 
 button:disabled, select:disabled {
 	color: #1010104C;
-	
 }
 
 div.fw_tabs > input[type="radio"] {
@@ -137,12 +136,9 @@ div.hex {
 	height: 25ex;
 	overflow-y: scroll;
 	border: 1px solid black;
+	padding: 0 0.2em;
 	font-family: monospace;
 	white-space: pre;
-}
-
-div.hex {
-	padding: 0 0.2em;
 }
 
 div.hex > span.o {

@@ -152,12 +152,12 @@
 							<td>CH32V003</td>
 							<td>N/A</td>
 							<td>TX = PD5,<br />RX = PD6</td>
-							<td>User application code must instruct device to enter the bootloader via <code>FLASH_STATR.MODE</code> flag and software reset.</td>
+							<td>User application code must instruct device to enter the bootloader via setting <code>FLASH_STATR.MODE</code> flag and performing a software reset.</td>
 						</tr>
 						<tr>
 							<td>CH32L103</td>
 							<td>BOOT0 = 1,<br />BOOT1 = 0</td>
-							<td>[TBC]</td>
+							<td>TX = PA2,<br />RX = PA3</td>
 							<td></td>
 						</tr>
 						<tr>
@@ -169,8 +169,8 @@
 						<tr>
 							<td>CH32V20x</td>
 							<td>BOOT0 = 1,<br />BOOT1 = 0</td>
-							<td>[TBC]</td>
-							<td></td>
+							<td>TX = PA9,<br />RX = PA10</td>
+							<td>For CH32V203F6P6 (TSSOP20), UART communication with bootloader not possible because it does not expose pins for PA9 and PA10.</td>
 						</tr>
 						<tr>
 							<td>CH32V30x</td>
@@ -182,7 +182,7 @@
 							<td>CH32X03x</td>
 							<td>PC16 = 0,<br />PC17 = 1</td>
 							<td>TX = PA2,<br />RX = PA3</td>
-							<td>Bootloader can only be entered from power-on reset?</td>
+							<td>Bootloader appears to only be enterable from power-on reset.</td>
 						</tr>
 					</tbody>
 				</table>
@@ -202,7 +202,7 @@
 			
 			<hgroup>
 				<h3>I tried to load a firmware file, but I get a maximum size exceeded error.</h3>
-				<p>You may have loaded an Intel Hex or S-Record file that specifies the firmware image to be loaded at an address of 0x8000000 and onwards. Because this tool expects addressing to be relative, not absolute, such a file will cause it to first try and fill the range from 0x0 to 0x7FFFFFF with blank data before processing the file's data. Because that amount of data is larger than the maximum (512 KiB), an error occurs.</p>
+				<p>You may have loaded an Intel Hex or S-Record file that specifies the firmware image to be loaded at an address of 0x8000000 and onwards. Because this tool expects addressing to be relative, not absolute, such a file will cause it to first try and fill the range from 0x0 to 0x7FFFFFF with blank data before processing the file's data. Because that amount of data is larger than the maximum allowed, an error occurs.</p>
 				<p>Your firmware image should instead be based at 0x0, using relative addressing, not absolute.</p>
 			</hgroup>
 			
