@@ -22,7 +22,7 @@ It uses the JavaScript [Web Serial](https://developer.mozilla.org/en-US/docs/Web
 
 Currently supported RISC-V WCH microcontrollers:
 
-* CH32V003
+* CH32V00x
 * CH32L103
 * CH32V103
 * CH32V20x
