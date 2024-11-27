@@ -47,11 +47,11 @@ function createHexListing(bytes, fileName) {
 			const n = i + (j * 2);
 			if(n < bytes.length) {
 				data += Formatter.hex(bytes[n], 2);
-				text += Formatter.printableText(bytes[n]);
+				text += Formatter.printableText(bytes[n], "·");
 			}
 			if(n + 1 < bytes.length) {
 				data += Formatter.hex(bytes[n + 1], 2);
-				text += Formatter.printableText(bytes[n + 1]);
+				text += Formatter.printableText(bytes[n + 1], "·");
 			}
 			data += " ";
 		}
