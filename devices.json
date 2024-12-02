@@ -405,7 +405,7 @@
 		]
 	},
 	{
-		"family": "CH32V20x",
+		"family": "CH32V203",
 		"devices": [
 			{
 				"name": "CH32V203C6T6",
@@ -413,7 +413,7 @@
 				"type": 25,
 				"variant": 51,
 				"flash": {
-					"size": 32768,
+					"size": 229376,
 					"page_size": 256,
 					"page_count": 128,
 					"sector_size": 4096,
@@ -426,7 +426,7 @@
 				"type": 25,
 				"variant": 49,
 				"flash": {
-					"size": 65536,
+					"size": 229376,
 					"page_size": 256,
 					"page_count": 256,
 					"sector_size": 4096,
@@ -439,7 +439,7 @@
 				"type": 25,
 				"variant": 48,
 				"flash": {
-					"size": 65536,
+					"size": 229376,
 					"page_size": 256,
 					"page_count": 256,
 					"sector_size": 4096,
@@ -452,7 +452,7 @@
 				"type": 25,
 				"variant": 55,
 				"flash": {
-					"size": 32768,
+					"size": 229376,
 					"page_size": 256,
 					"page_count": 128,
 					"sector_size": 4096,
@@ -465,7 +465,7 @@
 				"type": 25,
 				"variant": 58,
 				"flash": {
-					"size": 65536,
+					"size": 229376,
 					"page_size": 256,
 					"page_count": 256,
 					"sector_size": 4096,
@@ -478,7 +478,7 @@
 				"type": 25,
 				"variant": 62,
 				"flash": {
-					"size": 65536,
+					"size": 229376,
 					"page_size": 256,
 					"page_count": 256,
 					"sector_size": 4096,
@@ -491,7 +491,7 @@
 				"type": 25,
 				"variant": 54,
 				"flash": {
-					"size": 32768,
+					"size": 229376,
 					"page_size": 256,
 					"page_count": 128,
 					"sector_size": 4096,
@@ -504,7 +504,7 @@
 				"type": 25,
 				"variant": 59,
 				"flash": {
-					"size": 65536,
+					"size": 229376,
 					"page_size": 256,
 					"page_count": 256,
 					"sector_size": 4096,
@@ -517,7 +517,7 @@
 				"type": 25,
 				"variant": 53,
 				"flash": {
-					"size": 32768,
+					"size": 229376,
 					"page_size": 256,
 					"page_count": 128,
 					"sector_size": 4096,
@@ -530,7 +530,7 @@
 				"type": 25,
 				"variant": 50,
 				"flash": {
-					"size": 65536,
+					"size": 229376,
 					"page_size": 256,
 					"page_count": 256,
 					"sector_size": 4096,
@@ -543,20 +543,25 @@
 				"type": 25,
 				"variant": 52,
 				"flash": {
-					"size": 131072,
+					"size": 229376,
 					"page_size": 256,
 					"page_count": 512,
 					"sector_size": 4096,
 					"sector_count": 32
 				}
-			},
+			}
+		]
+	},
+	{
+		"family": "CH32V208",
+		"devices": [
 			{
 				"name": "CH32V208CBU6",
 				"package": "QFN48",
 				"type": 25,
 				"variant": 130,
 				"flash": {
-					"size": 131072,
+					"size": 491520,
 					"page_size": 256,
 					"page_count": 512,
 					"sector_size": 4096,
@@ -569,7 +574,7 @@
 				"type": 25,
 				"variant": 131,
 				"flash": {
-					"size": 131072,
+					"size": 491520,
 					"page_size": 256,
 					"page_count": 512,
 					"sector_size": 4096,
@@ -582,7 +587,7 @@
 				"type": 25,
 				"variant": 129,
 				"flash": {
-					"size": 131072,
+					"size": 491520,
 					"page_size": 256,
 					"page_count": 512,
 					"sector_size": 4096,
@@ -595,7 +600,7 @@
 				"type": 25,
 				"variant": 128,
 				"flash": {
-					"size": 131072,
+					"size": 491520,
 					"page_size": 256,
 					"page_count": 512,
 					"sector_size": 4096,
@@ -613,7 +618,7 @@
 				"type": 23,
 				"variant": 51,
 				"flash": {
-					"size": 131072,
+					"size": 491520,
 					"page_size": 256,
 					"page_count": 512,
 					"sector_size": 4096,
@@ -626,7 +631,7 @@
 				"type": 23,
 				"variant": 50,
 				"flash": {
-					"size": 131072,
+					"size": 491520,
 					"page_size": 256,
 					"page_count": 512,
 					"sector_size": 4096,
@@ -639,7 +644,7 @@
 				"type": 23,
 				"variant": 49,
 				"flash": {
-					"size": 262144,
+					"size": 491520,
 					"page_size": 256,
 					"page_count": 1024,
 					"sector_size": 4096,
@@ -652,7 +657,7 @@
 				"type": 23,
 				"variant": 48,
 				"flash": {
-					"size": 262144,
+					"size": 491520,
 					"page_size": 256,
 					"page_count": 1024,
 					"sector_size": 4096,
@@ -665,7 +670,7 @@
 				"type": 23,
 				"variant": 82,
 				"flash": {
-					"size": 131072,
+					"size": 491520,
 					"page_size": 256,
 					"page_count": 512,
 					"sector_size": 4096,
@@ -678,7 +683,7 @@
 				"type": 23,
 				"variant": 91,
 				"flash": {
-					"size": 131072,
+					"size": 491520,
 					"page_size": 256,
 					"page_count": 512,
 					"sector_size": 4096,
@@ -691,7 +696,7 @@
 				"type": 23,
 				"variant": 80,
 				"flash": {
-					"size": 131072,
+					"size": 491520,
 					"page_size": 256,
 					"page_count": 512,
 					"sector_size": 4096,
@@ -704,7 +709,7 @@
 				"type": 23,
 				"variant": 114,
 				"flash": {
-					"size": 131072,
+					"size": 491520,
 					"page_size": 256,
 					"page_count": 512,
 					"sector_size": 4096,
@@ -717,7 +722,7 @@
 				"type": 23,
 				"variant": 113,
 				"flash": {
-					"size": 262144,
+					"size": 491520,
 					"page_size": 256,
 					"page_count": 1024,
 					"sector_size": 4096,
@@ -730,7 +735,7 @@
 				"type": 23,
 				"variant": 115,
 				"flash": {
-					"size": 262144,
+					"size": 491520,
 					"page_size": 256,
 					"page_count": 1024,
 					"sector_size": 4096,
@@ -743,7 +748,7 @@
 				"type": 23,
 				"variant": 112,
 				"flash": {
-					"size": 262144,
+					"size": 491520,
 					"page_size": 256,
 					"page_count": 1024,
 					"sector_size": 4096,

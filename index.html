@@ -213,6 +213,13 @@
 			</hgroup>
 			
 			<hgroup>
+				<h3>Why are the listed flash sizes for CH32V20x and CH32V30x larger than specified in the datasheet?</h3>
+				<p>These families actually use a dual-die configuration inside the package: one for the microcontroller only, and a second for the flash memory. The MCU also features a large amount of RAM, greater than what is available to the user. At start-up, they automatically copy a certain portion of this 'external' flash into a reserved area of RAM, and code is executed from there, as if it were flash. This caching permits higher microcontroller speed than would otherwise be possible with such an 'external' flash.</p>
+				<p>For some devices in these families, the relative proportion of code flash to RAM can be configured in the option bytes (see reference manual for details). For example, less flash but more RAM, or more flash but less RAM. The datasheet specification tables list the <em>default</em> size allocated to the flash RAM cache, not the physical flash capacity.</p>
+				<p>The larger, actual flash capacity is utilised by this tool so that the entire capacity of flash is capable of being written to, regardless of configured flash-RAM split.</p>
+			</hgroup>
+			
+			<hgroup>
 				<h3>I tried to load a firmware file, but I get a maximum size exceeded error.</h3>
 				<p>You may have loaded an Intel Hex or S-Record file that specifies the firmware image to be loaded at an address of 0x8000000 and onwards. Because this tool expects addressing to be relative, not absolute, such a file will cause it to first try and fill the range from 0x0 to 0x7FFFFFF with blank data before processing the file's data. Because that amount of data is larger than the maximum allowed, an error occurs.</p>
 				<p>Your firmware image should instead be based at 0x0, using relative addressing, not absolute.</p>
