@@ -23,8 +23,6 @@ import { ContentDispositionDecoder } from "./util.js";
 const MAX_SIZE_BYTES = 1048576;
 
 export class Firmware {
-	static #parsers = new Map();
-	
 	#bytes;
 	#name;
 	#extension;
@@ -33,8 +31,13 @@ export class Firmware {
 	constructor(bytes, name, format) {
 		this.#bytes = bytes;
 		this.#name = name;
-		this.#extension = this.constructor.#getFilenameExtension(name);
+		this.#extension = this.#getFilenameExtension(name);
 		this.#format = format;
+	}
+	
+	#getFilenameExtension(name) {
+		const nameDotPos = name.lastIndexOf(".");
+		return (nameDotPos >= 0 ? name.slice(nameDotPos + 1).toLowerCase() : "");
 	}
 	
 	fillToEndOfSegment(segmentSize, fillVal = 0xFF) {
@@ -78,19 +81,49 @@ export class Firmware {
 	get format() {
 		return this.#format;
 	}
+}
+
+export class FirmwareLoader extends EventTarget {
+	#parsers = new Map();
 	
-	static addParser(extensions, parser) {
-		for(const ext of extensions) {
-			this.#parsers.set(ext.trim().toLowerCase(), parser);
-		}
+	constructor() {
+		super();
 	}
 	
-	static #getFilenameExtension(name) {
+	#getFilenameExtension(name) {
 		const nameDotPos = name.lastIndexOf(".");
 		return (nameDotPos >= 0 ? name.slice(nameDotPos + 1).toLowerCase() : "");
 	}
 	
-	static async #parseBlob(blob, name) {
+	#getUrlResponseFilename(response) {
+		// First, try to extract a filename given in any Content-Disposition
+		// header present in the HTTP response.
+		if(response.headers.has("Content-Disposition")) {
+			return ContentDispositionDecoder.getFilename(response.headers.get("Content-Disposition"));
+		}
+		
+		// Otherwise, try to extract a filename from the last part of the URL
+		// path.
+		const url = new URL(response.url);
+		const slashPos = url.pathname.lastIndexOf("/");
+		if(url.pathname.length > 1 && slashPos >= 0) {
+			return url.pathname.slice(slashPos + 1);
+		}
+		
+		// Failing all the above, just return a default name.
+		return "[unknown]";
+	}
+	
+	#progressEvent(incr, total) {
+		this.dispatchEvent(new CustomEvent("progress", {
+			detail: {
+				increment: incr,
+				total: total
+			}
+		}));
+	}
+	
+	async #parseBlob(blob, name) {
 		if(blob.size == 0) throw new Error("No data to parse; file is empty");
 		
 		const extension = this.#getFilenameExtension(name);
@@ -118,33 +151,20 @@ export class Firmware {
 		
 		return { bytes: bytes, format: format };
 	}
-	
-	static #getUrlResponseFilename(response) {
-		// First, try to extract a filename given in any Content-Disposition
-		// header present in the HTTP response.
-		if(response.headers.has("Content-Disposition")) {
-			return ContentDispositionDecoder.getFilename(response.headers.get("Content-Disposition"));
+
+	addParser(extensions, parser) {
+		for(const ext of extensions) {
+			this.#parsers.set(ext.trim().toLowerCase(), parser);
 		}
-		
-		// Otherwise, try to extract a filename from the last part of the URL
-		// path.
-		const url = new URL(response.url);
-		const slashPos = url.pathname.lastIndexOf("/");
-		if(url.pathname.length > 1 && slashPos >= 0) {
-			return url.pathname.slice(slashPos + 1);
-		}
-		
-		// Failing all the above, just return a default name.
-		return "[unknown]";
 	}
 	
-	static async fromFile(file) {
+	async fromFile(file) {
 		const { bytes, format } = await this.#parseBlob(file, file.name);
 		
-		return new this(bytes, file.name, format);
+		return new Firmware(bytes, file.name, format);
 	}
 	
-	static async fromUrl(urlStr) {
+	async fromUrl(urlStr) {
 		// See if the given URL string starts with a protocol. If not, then add
 		// "http://" prefix. If it does, but it's not HTTP, then error.
 		const protoMatch = urlStr.match(/^([a-z]+):\/\//i);
@@ -158,23 +178,55 @@ export class Firmware {
 		const url = URL.parse(urlStr);
 		if(!url) throw new Error("URL \"" + urlStr + "\" is not valid");
 		
-		let response, blob, name;
+		// Trigger an initial progress event with indeterminate state in case of
+		// slow-responding server.
+		this.#progressEvent(null, null);
 		
-		try {
-			response = await window.fetch(url);
-		} catch(err) {
-			throw new Error("Couldn't fetch from server", { cause: err });
-		}
-		
-		if(response.ok) {
-			name = this.#getUrlResponseFilename(response);
-			blob = await response.blob();
-		} else {
+		// Make the HTTP request.
+		const response = await window.fetch(url);
+		if(!response.ok) {
 			throw new Error("Server response: " + response.status + " " + response.statusText);
 		}
 		
+		const reader = response.body.getReader();
+		
+		// Get the length of the content (if stated by server). When the
+		// response body is encoded (e.g. gzip), we don't know what the actual
+		// uncompressed length will be, so estimate it to be 2:1 compressed.
+		let totalLength = Number.parseInt(response.headers.get("Content-Length")) || 0;
+		if(response.headers.has("Content-Encoding")) totalLength *= 2;
+
+		let chunks = [];
+		let receivedLength = 0;
+		
+		this.#progressEvent(receivedLength, totalLength);
+		
+		while(true) {
+			const { value: chunk, done } = await reader.read();
+			if(done) break;
+
+			// Append the chunk to the list. In the unusual case that the
+			// received length is now greater than the total length, then just
+			// set the total length to be the received length so far.
+			chunks.push(chunk);
+			receivedLength += chunk.length;
+			totalLength = Math.max(receivedLength, totalLength);
+			
+			this.#progressEvent(receivedLength, totalLength);
+		}
+
+		// One last progress call to ensure we finish off to 100%.
+		this.#progressEvent(totalLength, totalLength);
+		
+		// Create our own Blob object out of all the chunks received.
+		const name = this.#getUrlResponseFilename(response);
+		const blob = new Blob(chunks, {
+			type: response.headers.get("Content-Type"),
+			endings: "native"
+		});
+		
 		const { bytes, format } = await this.#parseBlob(blob, name);
 		
-		return new this(bytes, name, format);
+		return new Firmware(bytes, name, format);
 	}
 }

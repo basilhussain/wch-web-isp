@@ -21,7 +21,7 @@
 import { IntelHexParser } from "./modules/parsers/intelhex.js";
 import { SRecordParser } from "./modules/parsers/srecord.js";
 import { ElfRiscVParser } from "./modules/parsers/elf.js";
-import { Firmware } from "./modules/firmware.js";
+import { FirmwareLoader, Firmware } from "./modules/firmware.js";
 import { Session } from "./modules/session.js";
 import { DevicesDatabase } from "./modules/devices.js";
 import { Logger } from "./modules/logger.js";
@@ -73,6 +73,19 @@ function createHexListing(bytes, fileName) {
 	
 	document.getElementById("fw_name_val").textContent = fileName;
 	document.getElementById("fw_size_val").textContent = bytes.length.toLocaleString();
+}
+
+function updateUrlLoadProgress(event) {
+	const bar = document.getElementById("fw_url_progress");
+	
+	// When either event value is null, make the progress bar 'indeterminate'
+	// by removing its 'value' attribute. Otherwise, set its value accordingly.
+	if(event.detail.increment === null || event.detail.total === null) {
+		bar.removeAttribute("value");
+	} else {
+		const val = Math.min(event.detail.increment / event.detail.total, 1.0);
+		bar.setAttribute("value", val);
+	}
 }
 
 function configInputIds() {
@@ -144,7 +157,7 @@ function checkFirmwareSize(fwSize, flashSize) {
 	}
 }
 
-function updateProgress(event) {
+function updateOperationProgress(event) {
 	const bar = document.getElementById("progress_bar");
 	const pct = document.getElementById("progress_pct");
 	const icon = document.getElementById("progress_result");
@@ -156,15 +169,15 @@ function updateProgress(event) {
 		pct.textContent = "∞";
 	} else {
 		const val = Math.min(event.detail.increment / event.detail.total, 1.0);
-		bar.setAttribute("value", val.toString());
-		pct.textContent = Math.floor(val * 100).toString() + "%";
+		bar.setAttribute("value", val);
+		pct.textContent = Math.floor(val * 100) + "%";
 	}
 	
 	icon.classList.remove("failure", "success");
 	icon.removeAttribute("title");
 }
 
-function updateResult(success) {
+function updateOperationResult(success) {
 	const icon = document.getElementById("progress_result");
 	
 	icon.classList.remove("failure", "success");
@@ -209,13 +222,15 @@ function clearLog() {
 
 /******************************************************************************/
 
-Firmware.addParser(["hex", "ihx"], IntelHexParser);
-Firmware.addParser(["srec", "s19", "s28", "s37"], SRecordParser);
-Firmware.addParser(["elf"], ElfRiscVParser);
-
+const loader = new FirmwareLoader();
 const logger = new Logger(logMessage);
 const devices = new DevicesDatabase();
 const params = new URLSearchParams(window.location.search);
+
+loader.addParser(["hex", "ihx"], IntelHexParser);
+loader.addParser(["srec", "s19", "s28", "s37"], SRecordParser);
+loader.addParser(["elf"], ElfRiscVParser);
+loader.addEventListener("progress", updateUrlLoadProgress);
 
 // Create promises that resolve when devices JSON and DOM content have finished
 // loading.
@@ -254,7 +269,7 @@ Promise.all([contentLoaded, devicesLoaded])
 		fwUrlLoad.addEventListener("click", (event) => {
 			clearHexListing();
 			
-			Firmware.fromUrl(fwUrl.value)
+			loader.fromUrl(fwUrl.value)
 				.then((fw) => {
 					logger.info("Loaded " + fw.format + " firmware file from \"" + fwUrl.value + "\"");
 					fw.fillToEndOfSegment(1024);
@@ -278,7 +293,7 @@ Promise.all([contentLoaded, devicesLoaded])
 			if(fwFile.files.length > 0) {
 				clearHexListing();
 				
-				Firmware.fromFile(fwFile.files[0])
+				loader.fromFile(fwFile.files[0])
 					.then((fw) => {
 						logger.info("Loaded " + fw.format + " firmware file from \"" + fwFile.files[0].name + "\"");
 						fw.fillToEndOfSegment(1024);
@@ -341,7 +356,7 @@ Promise.all([contentLoaded, devicesLoaded])
 			let success = true;
 			const sess = new Session(device["variant"], device["type"]);
 			sess.setLogger(logger);
-			sess.addEventListener("progress", updateProgress);
+			sess.addEventListener("progress", updateOperationProgress);
 			sess.start()
 				.then(() => sess.identify())
 				.then(() => sess.configRead())
@@ -355,7 +370,7 @@ Promise.all([contentLoaded, devicesLoaded])
 				})
 				.finally(() => {
 					sess.end();
-					updateResult(success);
+					updateOperationResult(success);
 					restoreActionButtonsEnabled(btnState);
 					setActionButtonsEnabled(getConfigIsValid(), ["config_write"]);
 				});
@@ -366,7 +381,7 @@ Promise.all([contentLoaded, devicesLoaded])
 			let success = true;
 			const sess = new Session(device["variant"], device["type"]);
 			sess.setLogger(logger);
-			sess.addEventListener("progress", updateProgress);
+			sess.addEventListener("progress", updateOperationProgress);
 			sess.start()
 				.then(() => sess.identify())
 				.then(() => sess.configRead())
@@ -378,7 +393,7 @@ Promise.all([contentLoaded, devicesLoaded])
 				})
 				.finally(() => {
 					sess.end();
-					updateResult(success);
+					updateOperationResult(success);
 					restoreActionButtonsEnabled(btnState);
 				});
 		});
@@ -388,7 +403,7 @@ Promise.all([contentLoaded, devicesLoaded])
 			let success = true;
 			const sess = new Session(device["variant"], device["type"]);
 			sess.setLogger(logger);
-			sess.addEventListener("progress", updateProgress);
+			sess.addEventListener("progress", updateOperationProgress);
 			sess.start()
 				.then(() => sess.identify())
 				.then(() => sess.configRead())
@@ -404,7 +419,7 @@ Promise.all([contentLoaded, devicesLoaded])
 				})
 				.finally(() => {
 					sess.end();
-					updateResult(success);
+					updateOperationResult(success);
 					restoreActionButtonsEnabled(btnState);
 				});
 		});
@@ -414,7 +429,7 @@ Promise.all([contentLoaded, devicesLoaded])
 			let success = true;
 			const sess = new Session(device["variant"], device["type"]);
 			sess.setLogger(logger);
-			sess.addEventListener("progress", updateProgress);
+			sess.addEventListener("progress", updateOperationProgress);
 			sess.start()
 				.then(() => sess.identify())
 				.then(() => sess.configRead())
@@ -427,7 +442,7 @@ Promise.all([contentLoaded, devicesLoaded])
 				})
 				.finally(() => {
 					sess.end();
-					updateResult(success);
+					updateOperationResult(success);
 					restoreActionButtonsEnabled(btnState);
 				});
 		});
@@ -441,7 +456,7 @@ Promise.all([contentLoaded, devicesLoaded])
 				let success = true;
 				const sess = new Session(device["variant"], device["type"]);
 				sess.setLogger(logger);
-				sess.addEventListener("progress", updateProgress);
+				sess.addEventListener("progress", updateOperationProgress);
 				sess.start()
 					.then(() => sess.identify())
 					.then(() => sess.configRead())
@@ -453,7 +468,7 @@ Promise.all([contentLoaded, devicesLoaded])
 					})
 					.finally(() => {
 						sess.end();
-						updateResult(success);
+						updateOperationResult(success);
 						restoreActionButtonsEnabled(btnState);
 					});
 			}

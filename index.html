@@ -56,11 +56,16 @@
 					<label for="fw_tab_url">URL</label>
 					<div class="fw_tab_panels">
 						<div class="fw_tab_panel" id="fw_tab_panel_file">
-							<input id="fw_file" type="file" accept=".bin,.hex,.ihx,.srec,.s19,.s28,.s37,.elf" />
+							<div>
+								<input id="fw_file" type="file" accept=".bin,.hex,.ihx,.srec,.s19,.s28,.s37,.elf" />
+							</div>
 						</div>
 						<div class="fw_tab_panel" id="fw_tab_panel_url">
-							<input id="fw_url" type="url" required placeholder="Enter URL" />
-							<button id="fw_url_load" type="button" disabled>Load</button>
+							<div>
+								<input id="fw_url" type="url" required placeholder="Enter URL" />
+								<button id="fw_url_load" type="button" disabled>Load</button>
+							</div>
+							<progress id="fw_url_progress" value="0"></progress>
 						</div>
 					</div>
 				</div>

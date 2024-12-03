@@ -102,14 +102,23 @@ div.fw_tabs div.fw_tab_panels {
 
 div.fw_tabs div.fw_tab_panel {
 	display: none;
+}
+
+div.fw_tabs div.fw_tab_panel > div {
+	display: flex;
 	flex-direction: row;
 	align-items: center;
 	justify-content: space-between;
 }
 
+div.fw_tabs div.fw_tab_panel > progress {
+	width: 100%;
+	height: 1em;
+}
+
 div.fw_tabs > input[type="radio"]:nth-child(1):checked ~ div.fw_tab_panels > div.fw_tab_panel:nth-child(1),
 div.fw_tabs > input[type="radio"]:nth-child(3):checked ~ div.fw_tab_panels > div.fw_tab_panel:nth-child(2) {
-	display: flex;
+	display: block;
 }
 
 div.fw_tabs input[type="file"]#fw_file, div.fw_tabs input[type="url"]#fw_url {
