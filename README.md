@@ -30,6 +30,12 @@ Currently supported RISC-V WCH microcontrollers:
 * CH32V30x
 * CH32X03x
 
+## Limitations
+
+* This tool only works with the WCH factory bootloader. If you have overwritten a chip's bootloader code (the 'BOOT' flash area) with a custom bootloader, this tool will not be compatible.
+* The WCH bootloader protocol does not support *reading* user application flash. There is no command within the bootloader to do so.
+* Native USB communication is not supported.
+
 ## Building
 
 > [!NOTE]
