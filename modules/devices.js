@@ -1,7 +1,7 @@
 /*******************************************************************************
  *
  * WCH RISC-V Microcontroller Web Serial ISP
- * Copyright (c) 2024 Basil Hussain
+ * Copyright (c) 2025 Basil Hussain
  * 
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License as published by the Free
@@ -19,34 +19,12 @@
  ******************************************************************************/
 
 import { Formatter } from "./util.js";
+import { default as database } from "./devices.json";
 
 export class DevicesDatabase {
-	#devices = [];
+	#devices = database;
 	
 	constructor() { }
-	
-	async fetchDevicesData(url) {
-		let response;
-		
-		try {
-			response = await window.fetch(url, { headers: { "Accept": "application/json" } });
-		} catch(err) {
-			throw new Error("Error fetching device JSON data from \"" + url + "\"", { cause: err });
-		}
-		
-		if(response.ok) {
-			try {
-				this.#devices = await response.json();
-			} catch(err) {
-				throw new Error("Error parsing device JSON data", { cause: err });
-			}
-		} else {
-			throw new Error(
-				"Error fetching device JSON data from \"" + url + "\"",
-				{ cause: new Error("Server response: " + response.status + " " + response.statusText) }
-			);
-		}
-	}
 
 	populateDeviceList(list) {
 		this.#devices.forEach((fam, famIdx) => {

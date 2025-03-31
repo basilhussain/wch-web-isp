@@ -1,7 +1,7 @@
 /*******************************************************************************
  *
  * WCH RISC-V Microcontroller Web Serial ISP
- * Copyright (c) 2024 Basil Hussain
+ * Copyright (c) 2025 Basil Hussain
  * 
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License as published by the Free
@@ -232,12 +232,9 @@ loader.addParser(["srec", "s19", "s28", "s37"], SRecordParser);
 loader.addParser(["elf"], ElfRiscVParser);
 loader.addEventListener("progress", updateUrlLoadProgress);
 
-// Create promises that resolve when devices JSON and DOM content have finished
-// loading.
-const devicesLoaded = devices.fetchDevicesData("devices.json");
 const contentLoaded = new Promise((resolve) => document.addEventListener("DOMContentLoaded", resolve, false));
 
-Promise.all([contentLoaded, devicesLoaded])
+contentLoaded
 	.then(() => {
 		const deviceList = document.getElementById("device_list");
 		const fwUrl = document.getElementById("fw_url");
