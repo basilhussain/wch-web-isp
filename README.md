@@ -4,6 +4,7 @@ This is a serial ISP flashing tool for WCH RISC-V microcontrollers that runs in 
 
 It uses the JavaScript [Web Serial](https://developer.mozilla.org/en-US/docs/Web/API/SerialPort) browser API, and so requires support for this feature by the browser. At time of writing, only the following browsers feature support for the Web Serial API: Chrome version 89+, Edge version 89+, Opera version 76+. This tool does not work in FireFox and Safari, due to lack of support for the API.
 
+> [!NOTE]
 > **You can find a hosted version of this tool on my website, at: [https://www.stasisleak.uk/wchisp/](https://www.stasisleak.uk/wchisp/).**
 
 ## Features
@@ -29,15 +30,28 @@ Currently supported RISC-V WCH microcontrollers:
 * CH32V30x
 * CH32X03x
 
-## Self-Hosting
+## Building
 
-If you want to deploy a copy of this tool to be hosted on your own web server, installation is simple:
+> [!NOTE]
+> **A pre-built copy can be found in the Releases section of the GitHub repository.**
 
-1. Copy all files and sub-folders to a location of your choice on your web server.
-2. Load that server URL in your web browser.
-3. Done! Nothing else required. 😄
+Building requires the bundling tool [esbuild](https://esbuild.github.io/), a copy of which needs be installed in a `tools\esbuild` sub-folder of the project. Please note building is currently only supported on Windows.
 
-Please note that it is not possible to run this tool locally by loading `index.html` into a browser (i.e. straight from the filesystem via `file://`) due to [CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS) JS module restrictions.
+To build:
+
+1. Open a command prompt in the project folder.
+2. Run `build.bat`.
+3. The resultant HTML, JS, and CSS files will be output to the `dist` sub-folder.
+
+If any Linux/Mac users are feeling resourceful, they may wish to review the contents of `build.bat` and translate the script within to an appropriate shell script or discrete commands. 😄
+
+## Running
+
+If you downloaded a pre-built release, first extract the contents of the zip file to a location of your choice.
+
+Open in your web browser the `index.html` file from the `dist` folder.
+
+If you want to deploy a copy of this tool to be hosted on your own web server, simply upload all files within the `dist` folder to a location of your choice on your web server.
 
 ## Licence
 
