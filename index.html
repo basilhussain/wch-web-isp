@@ -183,7 +183,7 @@
 							<td>CH32X03x</td>
 							<td>PC16 = 0,<br />PC17 = 1</td>
 							<td>TX = PA2,<br />RX = PA3</td>
-							<td>Bootloader appears to only be enterable from power-on reset.</td>
+							<td>Bootloader only executes upon power-on reset, not from external (NRST) reset. Control pins are read by bootloader (not hardware). To take effect, pin states must be maintained for several milliseconds after power-on. If application flash is blank, control pins are ignored and bootloader always entered.</td>
 						</tr>
 					</tbody>
 				</table>
