@@ -1,7 +1,7 @@
 /*******************************************************************************
  *
  * WCH RISC-V Microcontroller Web Serial ISP
- * Copyright (c) 2024 Basil Hussain
+ * Copyright (c) 2025 Basil Hussain
  * 
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License as published by the Free
@@ -20,8 +20,32 @@
 
 import { Packet } from "./packet.js";
 
+// Some USB-UART interfaces for unknown reason don't like to have their port
+// reading stream flushed and will hang indefinitely and not return from
+// readable.cancel(). This shall be a list of USB devices for which we will
+// avoid doing that.
+//
+// Tested works with flush:
+// - Non-USB COM port (e.g. mobo on-board)
+// - WCHLink-E COM port: USB\VID_1A86&PID_8010&MI_01
+// - WCH CH340G: USB\VID_1A86&PID_7523
+// - FTDI FT2232H: FTDIBUS\COMPORT&VID_0403&PID_6010
+// Doesn't work:
+// - Silabs CP2102N: USB\VID_10C4&PID_EA60
+const PORT_FLUSH_BLOCKLIST = [
+	// Silicon Labs CP2102N
+	{ vid: 0x10C4, pid: 0xEA60 },
+	{ vid: 0x10C4, pid: 0xEA61 },
+	{ vid: 0x10C4, pid: 0xEA63 },
+];
+
 export class Transceiver {
 	#port;
+	
+	#canFlushPort(vid, pid) {
+		// If the given VID/PID are in the list, we should not attempt to flush.
+		return !PORT_FLUSH_BLOCKLIST.some((elem) => elem.vid === vid && elem.pid === pid);
+	}
 	
 	async open() {
 		if(!("serial" in navigator)) {
@@ -34,6 +58,8 @@ export class Transceiver {
 			throw new Error("Serial port selection cancelled or permission denied", { cause: err });
 		}
 		
+		const portInfo = this.#port.getInfo();
+		
 		try {
 			await this.#port.open({
 				baudRate: 115200,
@@ -43,10 +69,12 @@ export class Transceiver {
 				flowControl: "none"
 			});
 			
-			// Flush the port's reading stream. For some reason, sometimes a
-			// spurious 0x0 byte is waiting, which messes up receiving packets
-			// (because more data than expected is received).
-			await this.#port.readable.cancel();
+			if(this.#canFlushPort(portInfo.usbVendorId, portInfo.usbProductId)) {
+				// Flush the port's reading stream. For some reason, sometimes
+				// spurious bytes are already waiting, which messes up receiving
+				// packets (because more data than expected is received).
+				await this.#port.readable.cancel();
+			}
 		} catch(err) {
 			throw new Error("Error occurred attempting to open serial port", { cause: err });
 		}
