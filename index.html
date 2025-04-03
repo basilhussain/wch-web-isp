@@ -27,7 +27,13 @@
 		<form id="form">
 			<section>
 				<h2>Device</h2>
-				<p><select id="device_list"></select></p>
+				<p class="device_ctrls">
+					<select id="device_list"></select>
+					<label for="device_dtr_rts_reset">
+						<input id="device_dtr_rts_reset" type="checkbox" />
+						Give DTR/RTS reset sequence when connecting
+					</label>
+				</p>
 			</section>
 			
 			<section>
@@ -192,6 +198,12 @@
 					<span class="note">2. 'TX' is transmit output from the device, 'RX' is receive input to the device.</span><br />
 				</p>
 				<p>For devices with BOOT0 and BOOT1 control pins, some package variants may have BOOT1 internally tied to GND, with only BOOT0 exposed. Other packages may not have either pin exposed, with BOOT0 tied internally to GND, effectively rendering the bootloader unusable.</p>
+			</hgroup>
+			
+			<hgroup>
+				<h3>What does the DTR/RTS reset sequence option do?</h3>
+				<p>For devices equipped with an ESP-style DTR/RTS auto-reset circuit that controls RST and BOOT0/1 pins, when this option is enabled it will, each time the serial connection is first opened, give a special sequence of signals on the serial DTR and RTS lines to cause the device to be reset into the bootloader.</p>
+				<p>This option will only be of use if: a) your serial COM/TTY interface actually exposes DTR and RTS signals (some do not), and; b) your target device has the additional circuitry necessary.</p>
 			</hgroup>
 			
 			<hgroup>

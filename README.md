@@ -20,6 +20,7 @@ It uses the JavaScript [Web Serial](https://developer.mozilla.org/en-US/docs/Web
 * Load firmware from local file or external URL.
 * Can take query string parameters to auto-select device and/or auto-load firmware from URL.
 * Hex preview listing of loaded firmware image.
+* Optional DTR/RTS sequence for auto-reset into bootloader.
 
 Currently supported RISC-V WCH microcontrollers:
 

@@ -237,6 +237,7 @@ const contentLoaded = new Promise((resolve) => document.addEventListener("DOMCon
 contentLoaded
 	.then(() => {
 		const deviceList = document.getElementById("device_list");
+		const deviceDtrRtsReset = document.getElementById("device_dtr_rts_reset");
 		const fwUrl = document.getElementById("fw_url");
 		const fwUrlLoad = document.getElementById("fw_url_load");
 		const fwFile = document.getElementById("fw_file");
@@ -351,7 +352,7 @@ contentLoaded
 		configRead.addEventListener("click", (event) => {
 			const btnState = setActionButtonsEnabled(false);
 			let success = true;
-			const sess = new Session(device["variant"], device["type"]);
+			const sess = new Session(device["variant"], device["type"], deviceDtrRtsReset.checked);
 			sess.setLogger(logger);
 			sess.addEventListener("progress", updateOperationProgress);
 			sess.start()
@@ -376,7 +377,7 @@ contentLoaded
 		configWrite.addEventListener("click", (event) => {
 			const btnState = setActionButtonsEnabled(false);
 			let success = true;
-			const sess = new Session(device["variant"], device["type"]);
+			const sess = new Session(device["variant"], device["type"], deviceDtrRtsReset.checked);
 			sess.setLogger(logger);
 			sess.addEventListener("progress", updateOperationProgress);
 			sess.start()
@@ -398,7 +399,7 @@ contentLoaded
 		flashWrite.addEventListener("click", (event) => {
 			const btnState = setActionButtonsEnabled(false);
 			let success = true;
-			const sess = new Session(device["variant"], device["type"]);
+			const sess = new Session(device["variant"], device["type"], deviceDtrRtsReset.checked);
 			sess.setLogger(logger);
 			sess.addEventListener("progress", updateOperationProgress);
 			sess.start()
@@ -424,7 +425,7 @@ contentLoaded
 		flashVerify.addEventListener("click", (event) => {
 			const btnState = setActionButtonsEnabled(false);
 			let success = true;
-			const sess = new Session(device["variant"], device["type"]);
+			const sess = new Session(device["variant"], device["type"], deviceDtrRtsReset.checked);
 			sess.setLogger(logger);
 			sess.addEventListener("progress", updateOperationProgress);
 			sess.start()
@@ -451,7 +452,7 @@ contentLoaded
 			)) {
 				const btnState = setActionButtonsEnabled(false);
 				let success = true;
-				const sess = new Session(device["variant"], device["type"]);
+				const sess = new Session(device["variant"], device["type"], deviceDtrRtsReset.checked);
 				sess.setLogger(logger);
 				sess.addEventListener("progress", updateOperationProgress);
 				sess.start()

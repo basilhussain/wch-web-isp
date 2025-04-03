@@ -75,6 +75,13 @@ button:disabled, select:disabled {
 	color: #1010104C;
 }
 
+p.device_ctrls {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+}
+
 div.fw_tabs > input[type="radio"] {
 	position: absolute;
 	left: -200vw;

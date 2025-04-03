@@ -19,6 +19,7 @@
  ******************************************************************************/
 
 import { Packet } from "./packet.js";
+import { Delay } from "./util.js";
 
 // Some USB-UART interfaces for unknown reason don't like to have their port
 // reading stream flushed and will hang indefinitely and not return from
@@ -41,10 +42,39 @@ const PORT_FLUSH_BLOCKLIST = [
 
 export class Transceiver {
 	#port;
-	
+	#dtrRtsReset = false;
+
+	constructor(dtrRtsReset = false) {
+		this.#dtrRtsReset = dtrRtsReset;
+	}
+
 	#canFlushPort(vid, pid) {
 		// If the given VID/PID are in the list, we should not attempt to flush.
 		return !PORT_FLUSH_BLOCKLIST.some((elem) => elem.vid === vid && elem.pid === pid);
+	}
+
+	async #resetWithDtrRts(resetPeriodMs = 100, delayPeriodMs = 100) {
+		// When target device is equipped with ESP-style auto-reset circuit to
+		// manipulate RST, BOOT0/1 lines, toggle DTR and RTS serial control
+		// signals in a sequence to get the device to reset and enter
+		// the bootloader.
+		try {
+			await this.#port.setSignals({
+				dataTerminalReady: false,
+				requestToSend: true
+			});
+			await Delay.milliseconds(resetPeriodMs);
+			await this.#port.setSignals({
+				dataTerminalReady: true,
+				requestToSend: false
+			});
+			await Delay.milliseconds(delayPeriodMs);
+			await this.#port.setSignals({
+				dataTerminalReady: false
+			});
+		} catch(err) {
+			throw new Error("Error occurred attempting to toggle DTR/RTS sequence for reset into bootloader", { cause: err });
+		}
 	}
 	
 	async open() {
@@ -77,6 +107,10 @@ export class Transceiver {
 			}
 		} catch(err) {
 			throw new Error("Error occurred attempting to open serial port", { cause: err });
+		}
+		
+		if(this.#dtrRtsReset) {
+			await this.#resetWithDtrRts();
 		}
 	}
 	

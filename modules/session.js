@@ -1,7 +1,7 @@
 /*******************************************************************************
  *
  * WCH RISC-V Microcontroller Web Serial ISP
- * Copyright (c) 2024 Basil Hussain
+ * Copyright (c) 2025 Basil Hussain
  * 
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License as published by the Free
@@ -46,10 +46,10 @@ export class Session extends EventTarget {
 	#key;
 	#sequence = 0;
 	
-	constructor(deviceVariant, deviceType) {
+	constructor(deviceVariant, deviceType, deviceDtrRtsReset) {
 		super();
 		
-		this.#trx = new Transceiver();
+		this.#trx = new Transceiver(deviceDtrRtsReset);
 		this.#device = { variant: deviceVariant, type: deviceType };
 	}
 	
