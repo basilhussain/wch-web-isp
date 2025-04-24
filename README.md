@@ -62,4 +62,4 @@ If you want to deploy a copy of this tool to be hosted on your own web server, s
 
 ## Licence
 
-This work is licenced under the [GNU Affero General Public License v3.0](https://www.gnu.org/licenses/agpl-3.0.html). See LICENCE.txt for details.
+This work is licenced under the [GNU Affero General Public License v3.0](https://www.gnu.org/licenses/agpl-3.0.html). See LICENSE.txt for details.
