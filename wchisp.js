@@ -234,12 +234,14 @@ loader.addParser(["srec", "s19", "s28", "s37"], SRecordParser);
 loader.addParser(["elf"], ElfRiscVParser);
 loader.addEventListener("progress", updateUrlLoadProgress);
 
-const contentLoaded = new Promise((resolve) => document.addEventListener("DOMContentLoaded", resolve, false));
+const windowLoaded = new Promise((resolve) => window.addEventListener("load", resolve, false));
 
-contentLoaded
+windowLoaded
 	.then(() => {
 		const deviceList = document.getElementById("device_list");
 		const deviceDtrRtsReset = document.getElementById("device_dtr_rts_reset");
+		const fwTabFile = document.getElementById("fw_tab_file");
+		const fwTabUrl = document.getElementById("fw_tab_url");
 		const fwUrl = document.getElementById("fw_url");
 		const fwUrlLoad = document.getElementById("fw_url_load");
 		const fwFile = document.getElementById("fw_file");
@@ -478,25 +480,47 @@ contentLoaded
 			clearLog();
 		});
 		
-		// When a device name was given in URL parameter, find it and
-		// automatically select it in the list.
-		if(params.has("dev")) {
-			const idx = devices.findDeviceIndexByName(params.get("dev"));
-			if(idx) {
-				deviceList.value = idx;
-				deviceList.dispatchEvent(new Event("change"));
+		// Wait a moment after page has fully loaded to allow browser auto-fill
+		// of form inputs to occur, then try and take actions where necessary
+		// according to their values. This is a bit of a hack, because there's
+		// no event for that.
+		setTimeout(() => {
+			if(params.has("dev")) {
+				// When a device name was given in URL parameter, find it and
+				// automatically select it in the list.
+				const idx = devices.findDeviceIndexByName(params.get("dev"));
+				if(idx) {
+					deviceList.value = idx;
+					deviceList.dispatchEvent(new Event("change"));
+				} else {
+					throw new Error("Couldn't find device with name \"" + params.get("dev") + "\"");
+				}
 			} else {
-				throw new Error("Couldn't find device with name \"" + params.get("dev") + "\"");
+				// Otherwise, update with any auto-filled device selection.
+				if(deviceList.selectedOptions.length > 0) {
+					deviceList.dispatchEvent(new Event("change"));
+				}
 			}
-		}
-		
-		// When a firmware file URL was given in URL parameter, load it.
-		if(params.has("fw")) {
-			document.getElementById("fw_tab_url").checked = true;
-			fwUrl.value = params.get("fw");
-			fwUrlLoad.disabled = false;
-			fwUrlLoad.dispatchEvent(new Event("click"));
-		}
+			
+			if(params.has("fw")) {
+				// When a firmware file URL was given in URL parameter, select
+				// the 'URL' tab and load that firmware.
+				fwTabUrl.checked = true;
+				fwUrl.value = params.get("fw");
+				fwUrl.dispatchEvent(new Event("input"));
+				fwUrlLoad.dispatchEvent(new Event("click"));
+			} else {
+				// Otherwise, if the Local File tab is currently selected,
+				// update with any auto-filled firmware filename. Or, if the URL
+				// tab is selected, process auto-filled firmware URL.
+				if(fwTabFile.checked && fwFile.files.length > 0) {
+					fwFile.dispatchEvent(new Event("change"));
+				} else if(fwTabUrl.checked && fwUrl.validity.valid) {
+					fwUrl.dispatchEvent(new Event("input"));
+					fwUrlLoad.dispatchEvent(new Event("click"));
+				}
+			}
+		}, 250);
 	})
 	.catch((err) => {
 		console.error(err);
