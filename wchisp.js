@@ -325,6 +325,7 @@ windowLoaded
 			if(event.dataTransfer.types.includes("Files") && event.dataTransfer.files.length > 0) {
 				// Assign the dropped file(s) to file input and manually trigger
 				// its change event.
+				fwTabFile.checked = true;
 				fwFile.files = event.dataTransfer.files;
 				fwFile.dispatchEvent(new Event("change"));
 			}
