@@ -322,13 +322,32 @@ windowLoaded
 		});
 		
 		fwHex.addEventListener("drop", (event) => {
-			if(event.dataTransfer.types.includes("Files") && event.dataTransfer.files.length > 0) {
-				// Assign the dropped file(s) to file input and manually trigger
-				// its change event.
-				fwTabFile.checked = true;
-				fwFile.files = event.dataTransfer.files;
-				fwFile.dispatchEvent(new Event("change"));
+			for(const item of event.dataTransfer.items) {
+				if(item.kind === "string" && item.type === "text/uri-list") {
+					// Set the dropped URI as URL input value and trigger its
+					// input event.
+					// Why can't getAsString() just return the damned string!?
+					item.getAsString((uri) => {
+						fwTabUrl.checked = true;
+						fwUrl.value = uri;
+						fwUrl.dispatchEvent(new Event("input"));
+						fwUrlLoad.dispatchEvent(new Event("click"));
+					});
+					
+					// Don't continue to look at any other items.
+					break;
+				} else if(item.kind === "file") {
+					// Assign the dropped file(s) to file input and manually
+					// trigger its change event.
+					fwTabFile.checked = true;
+					fwFile.files = event.dataTransfer.files;
+					fwFile.dispatchEvent(new Event("change"));
+					
+					// Don't continue to look at any other items.
+					break;
+				}
 			}
+			
 			event.preventDefault();
 		});
 		
