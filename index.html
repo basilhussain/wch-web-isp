@@ -29,8 +29,18 @@
 				<h2>Device</h2>
 				<p class="device_ctrls">
 					<select id="device_list"></select>
+					<span>
+						<label for="device_connect_usb">
+							<input id="device_connect_usb" type="radio" name="device_connect" value="usb" disabled />
+							USB
+						</label>
+						<label for="device_connect_uart">
+							<input id="device_connect_uart" type="radio" name="device_connect" value="uart" disabled />
+							UART
+						</label>
+					</span>
 					<label for="device_dtr_rts_reset">
-						<input id="device_dtr_rts_reset" type="checkbox" />
+						<input id="device_dtr_rts_reset" type="checkbox" disabled />
 						Give DTR/RTS reset sequence when connecting
 					</label>
 				</p>

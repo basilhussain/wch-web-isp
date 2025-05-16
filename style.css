@@ -75,6 +75,10 @@ button:disabled, select:disabled {
 	color: #1010104C;
 }
 
+label:has(input:disabled) {
+	color: gray;
+}
+
 p.device_ctrls {
 	display: flex;
 	flex-direction: row;
