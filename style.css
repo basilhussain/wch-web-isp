@@ -39,13 +39,14 @@ div#unsupported.hidden {
 
 #form section {
 	margin: 1em 0;
-	border: 2px solid #AF0000;
+	border: 2px solid;
+	border-image: linear-gradient(135deg, #AF0000, #CF0000) 1;
 }
 
 #form section > h2:first-child {
 	margin: 0 0 0.5em 0;
 	padding: 0.25em;
-	background-color: #AF0000;
+	background: linear-gradient(135deg, #AF0000, #CF0000);
 	color: white;
 	font-size: 1em;
 }
