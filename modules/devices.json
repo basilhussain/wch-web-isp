@@ -1,6 +1,10 @@
 [
 	{
 		"family": "CH32V00x",
+		"connection": {
+			"uart": true,
+			"usb": false
+		},
 		"devices": [
 			{
 				"name": "CH32V002A4M6",
@@ -279,6 +283,10 @@
 	},
 	{
 		"family": "CH32L103",
+		"connection": {
+			"uart": true,
+			"usb": true
+		},
 		"devices": [
 			{
 				"name": "CH32L103C8T6",
@@ -349,6 +357,10 @@
 	},
 	{
 		"family": "CH32V103",
+		"connection": {
+			"uart": true,
+			"usb": true
+		},
 		"devices": [
 			{
 				"name": "CH32V103C6T6",
@@ -406,6 +418,10 @@
 	},
 	{
 		"family": "CH32V203",
+		"connection": {
+			"uart": true,
+			"usb": true
+		},
 		"devices": [
 			{
 				"name": "CH32V203C6T6",
@@ -554,6 +570,10 @@
 	},
 	{
 		"family": "CH32V208",
+		"connection": {
+			"uart": true,
+			"usb": true
+		},
 		"devices": [
 			{
 				"name": "CH32V208CBU6",
@@ -611,6 +631,10 @@
 	},
 	{
 		"family": "CH32V30x",
+		"connection": {
+			"uart": true,
+			"usb": true
+		},
 		"devices": [
 			{
 				"name": "CH32V303CBT6",
@@ -759,6 +783,10 @@
 	},
 	{
 		"family": "CH32X03x",
+		"connection": {
+			"uart": true,
+			"usb": true
+		},
 		"devices": [
 			{
 				"name": "CH32X033F8P6",
