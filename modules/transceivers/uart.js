@@ -20,8 +20,10 @@
  * 
  ******************************************************************************/
 
-import { Packet } from "./packet.js";
-import { Delay } from "./util.js";
+import { Command } from "../command.js";
+import { ResponseType, Response } from "../response.js";
+import { Logger } from "../logger.js";
+import { Formatter, Delay } from "../util.js";
 
 // Some USB-UART interfaces for unknown reason don't like to have their port
 // reading stream flushed and will hang indefinitely and not return from
@@ -42,12 +44,19 @@ const PORT_FLUSH_BLOCKLIST = [
 	{ vid: 0x10C4, pid: 0xEA63 },
 ];
 
-export class Transceiver {
+const PACKET_COMMAND_HEADER = [0x57, 0xAB];
+const PACKET_RESPONSE_HEADER = [0x55, 0xAA];
+const PACKET_CHECKSUM_SIZE = 1;
+const PACKET_COMMAND_ENVELOPE_SIZE = PACKET_COMMAND_HEADER.length + PACKET_CHECKSUM_SIZE;
+const PACKET_RESPONSE_ENVELOPE_SIZE = PACKET_RESPONSE_HEADER.length + PACKET_CHECKSUM_SIZE;
+
+export class UartTransceiver {
 	#port;
 	#dtrRtsReset = false;
+	#logger = console;
 
-	constructor(dtrRtsReset = false) {
-		this.#dtrRtsReset = dtrRtsReset;
+	constructor(options) {
+		this.#dtrRtsReset = !!(options["dtrRtsReset"] ?? false);
 	}
 
 	#canFlushPort(vid, pid) {
@@ -79,10 +88,49 @@ export class Transceiver {
 		}
 	}
 	
+	#calculateChecksum(payload) {
+		return payload.reduce((acc, val) => acc = (acc + val) % 256, 0);
+	}
+	
+	#createCommandPacket(cmd) {
+		const payload = cmd.toBytes();
+		const packet = new Uint8Array(payload.length + PACKET_COMMAND_ENVELOPE_SIZE);
+		
+		packet.set(PACKET_COMMAND_HEADER, 0);
+		packet.set(payload, PACKET_COMMAND_HEADER.length);
+		packet[PACKET_COMMAND_HEADER.length + payload.length] = this.#calculateChecksum(payload);
+		
+		return packet;
+	}
+	
+	#validResponsePacket(bytes) {
+		if(bytes.length <= PACKET_RESPONSE_ENVELOPE_SIZE) return false;
+		
+		const header = bytes.slice(0, PACKET_RESPONSE_HEADER.length);
+		const payload = bytes.slice(PACKET_RESPONSE_HEADER.length, -PACKET_CHECKSUM_SIZE);
+		const checksum = bytes.at(-PACKET_CHECKSUM_SIZE);
+		
+		return (
+			header.every((val, idx) => val == PACKET_RESPONSE_HEADER[idx]) &&
+			checksum == this.#calculateChecksum(payload)
+		);
+	}
+	
+	#getResponsePacketPayload(bytes) {
+		return bytes.slice(PACKET_RESPONSE_HEADER.length, -PACKET_CHECKSUM_SIZE);
+	}
+	
+	setLogger(logger) {
+		if(!(logger instanceof Logger)) throw new Error("Logger argument must be a Logger object");
+		this.#logger = logger;
+	}
+	
 	async open() {
 		if(!("serial" in navigator)) {
 			throw new Error("Web Serial API is unsupported by this browser");
 		}
+		
+		this.#logger.info("Opening UART connection");
 		
 		try {
 			this.#port = await navigator.serial.requestPort();
@@ -116,18 +164,20 @@ export class Transceiver {
 		}
 	}
 	
-	async transmitPacket(packet) {
+	async transmitCommand(cmd) {
 		const writer = this.#port.writable.getWriter();
+		const packet = this.#createCommandPacket(cmd);
 		
-		await writer.write(packet.toBytes());
+		this.#logger.debug("TX (" + packet.length + " bytes): " + Formatter.hex(packet, 2));
+		
+		await writer.write(packet);
 		
 		writer.releaseLock();
 	}
 	
-	async receivePacket(length, timeout_ms = 3000) {
-		const bytes = new Uint8Array(length);
+	async receiveResponse(respClass, timeoutMs = 3000) {
+		const packet = new Uint8Array(respClass.type.size + PACKET_RESPONSE_ENVELOPE_SIZE);
 		let offset = 0, stop = false, error;
-		// let iterations = 0;
 		
 		const reader = this.#port.readable.getReader();
 		
@@ -136,30 +186,26 @@ export class Transceiver {
 			// This will cause any waiting reader.read() to throw an error.
 			stop = true;
 			reader.releaseLock();
-		}, timeout_ms);
+		}, timeoutMs);
 		
-		while(!stop && offset < bytes.length) {
+		while(!stop && offset < packet.length) {
 			try {
 				const { value: chunk, done } = await reader.read();
 				
-				// console.debug(iterations, chunk);
-				
 				if(done) break;
-				if(offset + chunk.length <= bytes.length) {
-					bytes.set(chunk, offset);
+				if(offset + chunk.length <= packet.length) {
+					packet.set(chunk, offset);
 					offset += chunk.length;
 				} else {
-					error = new Error("Unexpected data; received more than " + bytes.length + " bytes");
+					error = new Error("Unexpected data; received more than " + packet.length + " bytes");
 					break;
 				}
 			} catch(err) {
 				// Catch the error thrown by the reader on timeout (or other
 				// error) and re-throw a more suitable error.
-				error = new Error("Timed-out after " + timeout_ms + " ms waiting to receive, or read failure", { cause: err });
+				error = new Error("Timed-out after " + timeoutMs + " ms waiting to receive, or read failure", { cause: err });
 				break;
 			}
-			
-			// iterations++;
 		}
 		
 		clearTimeout(timer);
@@ -167,7 +213,11 @@ export class Transceiver {
 		
 		if(error) throw error;
 		
-		return Packet.fromBytes(bytes);
+		this.#logger.debug("RX (" + packet.length + " bytes): " + Formatter.hex(packet, 2));
+		
+		if(!this.#validResponsePacket(packet)) throw new Error("Invalid packet; too small, bad header, or bad checksum");
+		
+		return respClass.fromBytes(this.#getResponsePacketPayload(packet));
 	}
 	
 	async close() {

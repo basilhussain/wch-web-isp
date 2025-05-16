@@ -20,8 +20,6 @@
  * 
  ******************************************************************************/
 
-import { Packet } from "./packet.js";
-
 export class ResponseType {
 	static Identify = new ResponseType("Identify", 0xA1, 6);
 	static End = new ResponseType("End", 0xA2, 6);
@@ -73,14 +71,8 @@ export class Response {
 		this.#length = length;
 	}
 	
-	// TODO: maybe change this to a read-only property?
-	isValid() {
-		return (
-			this.#type instanceof ResponseType &&
-			this.#length > 0 &&
-			this.#data.length > 0 &&
-			this.#length == this.#data.length
-		);
+	get type() {
+		return this.#type;
 	}
 	
 	get data() {
@@ -91,8 +83,13 @@ export class Response {
 		return this.#length;
 	}
 	
-	static fromPacket(packet) {
-		return this.fromBytes(packet.payload);
+	get valid() {
+		return (
+			this.#type instanceof ResponseType &&
+			this.#length > 0 &&
+			this.#data.length > 0 &&
+			this.#length == this.#data.length
+		);
 	}
 	
 	static fromBytes(bytes) {
@@ -121,11 +118,19 @@ export class IdentifyResponse extends Response {
 	get deviceType() {
 		return this.data[1];
 	}
+	
+	static get type() {
+		return ResponseType.Identify;
+	}
 }
 
 export class EndResponse extends Response {
 	get success() {
 		return (this.length == 2 && this.data[0] == 0x00);
+	}
+	
+	static get type() {
+		return ResponseType.End;
 	}
 }
 
@@ -141,11 +146,19 @@ export class KeyResponse extends Response {
 	get keyChecksum() {
 		return this.data[0];
 	}
+	
+	static get type() {
+		return ResponseType.Key;
+	}
 }
 
 export class FlashEraseResponse extends Response {
 	get success() {
 		return (this.length == 2 && this.data[0] == 0x00);
+	}
+	
+	static get type() {
+		return ResponseType.FlashErase;
 	}
 }
 
@@ -153,12 +166,20 @@ export class FlashWriteResponse extends Response {
 	get success() {
 		return (this.length == 2 && this.data[0] == 0x00);
 	}
+	
+	static get type() {
+		return ResponseType.FlashWrite;
+	}
 }
 
 export class FlashVerifyResponse extends Response {
 	get success() {
 		// Bootloader returns 0xF5 or 0xFE on error.
 		return (this.length == 2 && this.data[0] == 0x00);
+	}
+	
+	static get type() {
+		return ResponseType.FlashVerify;
 	}
 }
 
@@ -196,11 +217,19 @@ export class ConfigReadResponse extends Response {
 	get chipUniqueID() {
 		return this.data.slice(18);
 	}
+	
+	static get type() {
+		return ResponseType.ConfigRead;
+	}
 }
 
 export class ConfigWriteResponse extends Response {
 	get success() {
 		return (this.length == 2 && this.data[0] == 0x00);
+	}
+	
+	static get type() {
+		return ResponseType.ConfigWrite;
 	}
 }
 

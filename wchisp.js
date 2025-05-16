@@ -159,6 +159,29 @@ function checkFirmwareSize(fwSize, flashSize) {
 	}
 }
 
+function getConnectionParams() {
+	const usb = document.getElementById("device_connect_usb");
+	const uart = document.getElementById("device_connect_uart");
+	const reset = document.getElementById("device_dtr_rts_reset");
+	
+	let params = {
+		method: undefined,
+		options: { dtrRtsReset: reset.checked }
+	};
+	
+	if(usb.checked) {
+		params.method = usb.value;
+	} else if(uart.checked) {
+		params.method = uart.value;
+	}
+	
+	if(!params.method) {
+		throw new Error("Connection method not selected; choose either USB or UART");
+	}
+	
+	return params;
+}
+
 function updateOperationProgress(event) {
 	const bar = document.getElementById("progress_bar");
 	const pct = document.getElementById("progress_pct");
@@ -234,11 +257,11 @@ loader.addParser(["srec", "s19", "s28", "s37"], SRecordParser);
 loader.addParser(["elf"], ElfRiscVParser);
 loader.addEventListener("progress", updateUrlLoadProgress);
 
-const windowLoaded = new Promise((resolve) => window.addEventListener("load", resolve, false));
-
-windowLoaded
-	.then(() => {
+window.addEventListener("load", (event) => {
+	try {
 		const deviceList = document.getElementById("device_list");
+		const deviceConnectUsb = document.getElementById("device_connect_usb");
+		const deviceConnectUart = document.getElementById("device_connect_uart");
 		const deviceDtrRtsReset = document.getElementById("device_dtr_rts_reset");
 		const fwTabFile = document.getElementById("fw_tab_file");
 		const fwTabUrl = document.getElementById("fw_tab_url");
@@ -256,7 +279,6 @@ windowLoaded
 		let device, firmware;
 		
 		devices.populateDeviceList(deviceList);
-		device = devices.findDeviceByIndex(deviceList.value);
 		
 		fwUrl.addEventListener("input", (event) => {
 			fwUrlLoad.disabled = !event.target.validity.valid;
@@ -359,9 +381,28 @@ windowLoaded
 				device["name"] + " (" + device["package"] + ", " + Formatter.byteSize(device["flash"]["size"]) + " flash)"
 			);
 			
+			deviceConnectUsb.disabled = !device["connection"]["usb"];
+			deviceConnectUart.disabled = !device["connection"]["uart"];
+			deviceDtrRtsReset.disabled = !device["connection"]["uart"];
+			
+			// When only USB or only UART supported, auto-select that option.
+			if(device["connection"]["usb"] && !device["connection"]["uart"]) {
+				deviceConnectUsb.checked = true;
+			} else if(device["connection"]["uart"] && !device["connection"]["usb"]) {
+				deviceConnectUart.checked = true;
+			}
+			
 			if(firmware !== undefined) {
 				checkFirmwareSize(firmware.size, device["flash"]["size"]);
 			}
+		});
+		
+		deviceConnectUsb.addEventListener("change", (event) => {
+			deviceDtrRtsReset.disabled = event.target.checked;
+		});
+		
+		deviceConnectUart.addEventListener("change", (event) => {
+			deviceDtrRtsReset.disabled = !event.target.checked;
 		});
 		
 		[
@@ -373,132 +414,136 @@ windowLoaded
 			});
 		});
 	
-		configRead.addEventListener("click", (event) => {
+		configRead.addEventListener("click", async (event) => {
+			let success = false;
 			const btnState = setActionButtonsEnabled(false);
-			let success = true;
-			const sess = new Session(device["variant"], device["type"], deviceDtrRtsReset.checked);
-			sess.setLogger(logger);
-			sess.addEventListener("progress", updateOperationProgress);
-			sess.start()
-				.then(() => sess.identify())
-				.then(() => sess.configRead())
-				.then((config) => {
-					populateConfig(config);
-					return sess.reset(true);
-				})
-				.catch((err) => {
-					logger.error(err.message);
-					success = false;
-				})
-				.finally(() => {
-					sess.end();
-					updateOperationResult(success);
-					restoreActionButtonsEnabled(btnState);
-					setActionButtonsEnabled(getConfigIsValid(), ["config_write"]);
-				});
+			try {
+				const sess = new Session(device, getConnectionParams());
+				sess.setLogger(logger);
+				sess.addEventListener("progress", updateOperationProgress);
+				await sess.start()
+					.then(() => sess.identify())
+					.then(() => sess.configRead())
+					.then((config) => (populateConfig(config), sess.reset(true)))
+					.then(() => success = true)
+					.catch((err) => logger.error(err.message))
+					.finally(() => sess.end());
+			} catch(err) {
+				logger.error(err.message);
+			} finally {
+				updateOperationResult(success);
+				restoreActionButtonsEnabled(btnState);
+				setActionButtonsEnabled(getConfigIsValid(), ["config_write"]);
+			}
 		});
 		
-		configWrite.addEventListener("click", (event) => {
+		configWrite.addEventListener("click", async (event) => {
+			let success = false;
 			const btnState = setActionButtonsEnabled(false);
-			let success = true;
-			const sess = new Session(device["variant"], device["type"], deviceDtrRtsReset.checked);
-			sess.setLogger(logger);
-			sess.addEventListener("progress", updateOperationProgress);
-			sess.start()
-				.then(() => sess.identify())
-				.then(() => sess.configRead())
-				.then(() => sess.configWrite(getConfigBytes()))
-				.then(() => sess.reset(true))
-				.catch((err) => {
-					logger.error(err.message);
-					success = false;
-				})
-				.finally(() => {
-					sess.end();
-					updateOperationResult(success);
-					restoreActionButtonsEnabled(btnState);
-				});
+			try {
+				const sess = new Session(device, getConnectionParams());
+				sess.setLogger(logger);
+				sess.addEventListener("progress", updateOperationProgress);
+				await sess.start()
+					.then(() => sess.identify())
+					.then(() => sess.configRead())
+					.then(() => sess.configWrite(getConfigBytes()))
+					.then(() => sess.reset(true))
+					.then(() => success = true)
+					.catch((err) => logger.error(err.message))
+					.finally(() => sess.end());
+			} catch(err) {
+				logger.error(err.message);
+			} finally {
+				updateOperationResult(success);
+				restoreActionButtonsEnabled(btnState);
+			}
 		});
 		
-		flashWrite.addEventListener("click", (event) => {
+		flashWrite.addEventListener("click", async (event) => {
+			let success = false;
 			const btnState = setActionButtonsEnabled(false);
-			let success = true;
-			const sess = new Session(device["variant"], device["type"], deviceDtrRtsReset.checked);
-			sess.setLogger(logger);
-			sess.addEventListener("progress", updateOperationProgress);
-			sess.start()
-				.then(() => sess.identify())
-				.then(() => sess.configRead())
-				.then(() => sess.keyGenerate())
-				.then(() => sess.flashErase(firmware.getSectorCount(1024)))
-				.then(() => sess.flashWrite(firmware.bytes))
-				.then(() => sess.keyGenerate())
-				.then(() => sess.flashVerify(firmware.bytes))
-				.then(() => sess.reset(true))
-				.catch((err) => {
-					logger.error(err.message);
-					success = false;
-				})
-				.finally(() => {
-					sess.end();
-					updateOperationResult(success);
-					restoreActionButtonsEnabled(btnState);
-				});
+			try {
+				const sess = new Session(device, getConnectionParams());
+				sess.setLogger(logger);
+				sess.addEventListener("progress", updateOperationProgress);
+				await sess.start()
+					.then(() => sess.identify())
+					.then(() => sess.configRead())
+					.then(() => sess.keyGenerate())
+					.then(() => sess.flashErase(firmware.getSectorCount(1024)))
+					.then(() => sess.flashWrite(firmware.bytes))
+					.then(() => sess.keyGenerate())
+					.then(() => sess.flashVerify(firmware.bytes))
+					.then(() => sess.reset(true))
+					.then(() => success = true)
+					.catch((err) => logger.error(err.message))
+					.finally(() => sess.end());
+			} catch(err) {
+				logger.error(err.message);
+			} finally {
+				updateOperationResult(success);
+				restoreActionButtonsEnabled(btnState);
+			}
 		});
 		
-		flashVerify.addEventListener("click", (event) => {
+		flashVerify.addEventListener("click", async (event) => {
+			let success = false;
 			const btnState = setActionButtonsEnabled(false);
-			let success = true;
-			const sess = new Session(device["variant"], device["type"], deviceDtrRtsReset.checked);
-			sess.setLogger(logger);
-			sess.addEventListener("progress", updateOperationProgress);
-			sess.start()
-				.then(() => sess.identify())
-				.then(() => sess.configRead())
-				.then(() => sess.keyGenerate())
-				.then(() => sess.flashVerify(firmware.bytes))
-				.then(() => sess.reset(true))
-				.catch((err) => {
-					logger.error(err.message);
-					success = false;
-				})
-				.finally(() => {
-					sess.end();
-					updateOperationResult(success);
-					restoreActionButtonsEnabled(btnState);
-				});
+			try {
+				const sess = new Session(device, getConnectionParams());
+				sess.setLogger(logger);
+				sess.addEventListener("progress", updateOperationProgress);
+				await sess.start()
+					.then(() => sess.identify())
+					.then(() => sess.configRead())
+					.then(() => sess.keyGenerate())
+					.then(() => sess.flashVerify(firmware.bytes))
+					.then(() => sess.reset(true))
+					.then(() => success = true)
+					.catch((err) => logger.error(err.message))
+					.finally(() => sess.end());
+			} catch(err) {
+				logger.error(err.message);
+			} finally {
+				updateOperationResult(success);
+				restoreActionButtonsEnabled(btnState);
+			}
 		});
 		
-		flashErase.addEventListener("click", (event) => {
+		flashErase.addEventListener("click", async (event) => {
 			if(window.confirm(
 				"Are you sure you want to ERASE the device?\n\n" +
 				"This will destroy ALL data in the user application flash!"
 			)) {
+				let success = false;
 				const btnState = setActionButtonsEnabled(false);
-				let success = true;
-				const sess = new Session(device["variant"], device["type"], deviceDtrRtsReset.checked);
-				sess.setLogger(logger);
-				sess.addEventListener("progress", updateOperationProgress);
-				sess.start()
-					.then(() => sess.identify())
-					.then(() => sess.configRead())
-					.then(() => sess.flashErase(Math.ceil(device["flash"]["size"] / 1024)))
-					.then(() => sess.reset(true))
-					.catch((err) => {
-						logger.error(err.message);
-						success = false;
-					})
-					.finally(() => {
-						sess.end();
-						updateOperationResult(success);
-						restoreActionButtonsEnabled(btnState);
-					});
+				try {
+					const sess = new Session(device, getConnectionParams());
+					sess.setLogger(logger);
+					sess.addEventListener("progress", updateOperationProgress);
+					await sess.start()
+						.then(() => sess.identify())
+						.then(() => sess.configRead())
+						.then(() => sess.flashErase(Math.ceil(device["flash"]["size"] / 1024)))
+						.then(() => sess.reset(true))
+						.then(() => success = true)
+						.catch((err) => logger.error(err.message))
+						.finally(() => sess.end());
+				} catch(err) {
+					logger.error(err.message);
+				} finally {
+					updateOperationResult(success);
+					restoreActionButtonsEnabled(btnState);
+				}
 			}
 		});
 		
 		logClear.addEventListener("click", (event) => {
 			clearLog();
 		});
+		
+		// TODO: add URL param for connection (usb/uart)?
 		
 		// Wait a moment after page has fully loaded to allow browser auto-fill
 		// of form inputs to occur, then try and take actions where necessary
@@ -541,11 +586,11 @@ windowLoaded
 				}
 			}
 		}, 250);
-	})
-	.catch((err) => {
+	} catch(err) {
 		console.error(err);
 		logger.error(err.message);
 		if(err.cause instanceof Error) {
 			logger.error(err.cause.message);
 		}
-	});
+	}
+});

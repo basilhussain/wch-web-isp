@@ -20,7 +20,6 @@
  * 
  ******************************************************************************/
 
-import { PacketType, Packet, InvalidPacketError } from "./packet.js";
 import {
 	CommandType, Command, IdentifyCommand, EndCommand, KeyCommand,
 	FlashEraseCommand, FlashWriteCommand, FlashVerifyCommand, ConfigReadCommand,
@@ -32,11 +31,16 @@ import {
 	ConfigReadResponse, ConfigWriteResponse, InvalidResponseError,
 	UnsuccessfulResponseError
 } from "./response.js";
-import { Transceiver } from "./transceiver.js";
+import { UartTransceiver } from "./transceivers/uart.js";
+import { UsbTransceiver } from "./transceivers/usb.js";
 import { Logger } from "./logger.js";
 import { Formatter } from "./util.js";
 
 const CHUNK_SIZE = 56;
+const TRANSCEIVERS = {
+	"usb": UsbTransceiver,
+	"uart": UartTransceiver
+};
 
 export class Session extends EventTarget {
 	#trx;
@@ -48,15 +52,17 @@ export class Session extends EventTarget {
 	#key;
 	#sequence = 0;
 	
-	constructor(deviceVariant, deviceType, deviceDtrRtsReset) {
+	constructor(device, connection) {
 		super();
 		
-		this.#trx = new Transceiver(deviceDtrRtsReset);
-		this.#device = { variant: deviceVariant, type: deviceType };
-	}
-	
-	#logPacket(prefix, packet) {
-		this.#logger.debug(prefix + " (" + packet.length + " bytes): " + packet.toString());
+		if(!("variant" in device && "type" in device)) throw new Error("Missing variant and/or type properties in device argument");
+		if(!("method" in connection)) throw new Error("Missing method property in connection argument");
+		
+		const trxClass = TRANSCEIVERS[connection["method"].toString()];
+		if(!trxClass) throw new Error("Undefined or unknown connection method");
+		
+		this.#device = device;
+		this.#trx = new trxClass(connection["options"]);
 	}
 	
 	#progressEvent(incr, total) {
@@ -71,6 +77,7 @@ export class Session extends EventTarget {
 	setLogger(logger) {
 		if(!(logger instanceof Logger)) throw new Error("Logger argument must be a Logger object");
 		this.#logger = logger;
+		this.#trx.setLogger(logger);
 	}
 	
 	async start() {
@@ -87,22 +94,15 @@ export class Session extends EventTarget {
 	async identify() {
 		this.#logger.debug(++this.#sequence + ": Identify");
 		
-		let packet, cmd, resp;
-
 		this.#progressEvent(null, null);
 		
 		// Send the command with expected device variant and type.
-		cmd = new IdentifyCommand(this.#device.variant, this.#device.type);
-		packet = Packet.fromCommand(cmd);
-		this.#logPacket("TX", packet);
-		await this.#trx.transmitPacket(packet);
+		const cmd = new IdentifyCommand(this.#device.variant, this.#device.type);
+		await this.#trx.transmitCommand(cmd);
 		
 		// Get response to the command.
-		packet = await this.#trx.receivePacket(Packet.sizeForResponseType(ResponseType.Identify));
-		this.#logPacket("RX", packet);
-		if(!packet.isValid()) throw new InvalidPacketError();
-		resp = IdentifyResponse.fromPacket(packet);
-		if(!resp.isValid()) throw new InvalidResponseError();
+		const resp = await this.#trx.receiveResponse(IdentifyResponse);
+		if(!resp.valid) throw new InvalidResponseError();
 		if(!resp.success) throw new UnsuccessfulResponseError();
 		
 		this.#logger.info(
@@ -130,23 +130,16 @@ export class Session extends EventTarget {
 	
 	async reset(doReset) {
 		this.#logger.debug(++this.#sequence + ": Reset");
-		
-		let packet, cmd, resp;
 
 		this.#progressEvent(null, null);
 		
 		// Send the command with parameter indicating whether reset wanted.
-		cmd = new EndCommand(doReset);
-		packet = Packet.fromCommand(cmd);
-		this.#logPacket("TX", packet);
-		await this.#trx.transmitPacket(packet);
+		const cmd = new EndCommand(doReset);
+		await this.#trx.transmitCommand(cmd);
 		
 		// Get response to the command.
-		packet = await this.#trx.receivePacket(Packet.sizeForResponseType(ResponseType.End));
-		this.#logPacket("RX", packet);
-		if(!packet.isValid()) throw new InvalidPacketError();
-		resp = EndResponse.fromPacket(packet);
-		if(!resp.isValid()) throw new InvalidResponseError();
+		const resp = await this.#trx.receiveResponse(EndResponse);
+		if(!resp.valid) throw new InvalidResponseError();
 		if(!resp.success) throw new UnsuccessfulResponseError();
 		
 		this.#progressEvent(100, 100);
@@ -154,27 +147,20 @@ export class Session extends EventTarget {
 	
 	async keyGenerate() {
 		this.#logger.debug(++this.#sequence + ": Key Generate");
-		
-		let packet, cmd, resp;
 
 		this.#progressEvent(null, null);
 		
 		// Send the command. Provide chip unique ID and device variant to key
 		// calculation routine.
-		cmd = new KeyCommand(this.#chipUID, this.#device.variant);
-		packet = Packet.fromCommand(cmd);
-		this.#logPacket("TX", packet);
-		await this.#trx.transmitPacket(packet);
+		const cmd = new KeyCommand(this.#chipUID, this.#device.variant);
+		await this.#trx.transmitCommand(cmd);
 		
 		// Save the generated key for later use by flash write/verify.
 		this.#key = cmd.key;
 		
 		// Get response to the command.
-		packet = await this.#trx.receivePacket(Packet.sizeForResponseType(ResponseType.Key));
-		this.#logPacket("RX", packet);
-		if(!packet.isValid()) throw new InvalidPacketError();
-		resp = KeyResponse.fromPacket(packet);
-		if(!resp.isValid()) throw new InvalidResponseError();
+		const resp = await this.#trx.receiveResponse(KeyResponse);
+		if(!resp.valid) throw new InvalidResponseError();
 		if(!resp.success) throw new UnsuccessfulResponseError();
 		
 		// As a sanity check, verify that the received checksum of the key
@@ -188,23 +174,16 @@ export class Session extends EventTarget {
 	
 	async flashErase(sectorCount) {
 		this.#logger.debug(++this.#sequence + ": Flash Erase");
-		
-		let packet, cmd, resp;
 
 		this.#progressEvent(null, null);
 		
 		// Send the command with given number of 1K sectors to be erased.
-		cmd = new FlashEraseCommand(sectorCount);
-		packet = Packet.fromCommand(cmd);
-		this.#logPacket("TX", packet);
-		await this.#trx.transmitPacket(packet);
+		const cmd = new FlashEraseCommand(sectorCount);
+		await this.#trx.transmitCommand(cmd);
 		
 		// Get response to the command.
-		packet = await this.#trx.receivePacket(Packet.sizeForResponseType(ResponseType.FlashErase));
-		this.#logPacket("RX", packet);
-		if(!packet.isValid()) throw new InvalidPacketError();
-		resp = FlashEraseResponse.fromPacket(packet);
-		if(!resp.isValid()) throw new InvalidResponseError();
+		const resp = await this.#trx.receiveResponse(FlashEraseResponse);
+		if(!resp.valid) throw new InvalidResponseError();
 		if(!resp.success) throw new UnsuccessfulResponseError();
 		
 		this.#progressEvent(100, 100);
@@ -213,8 +192,6 @@ export class Session extends EventTarget {
 	async flashWrite(bytes) {
 		this.#logger.debug(++this.#sequence + ": Flash Write");
 		
-		let packet, cmd, resp;
-		
 		for(let offset = 0; offset < bytes.length; offset += CHUNK_SIZE) {
 			// Call the progress callback with two arguments: the current number
 			// of bytes so far, and the total number.
@@ -222,34 +199,24 @@ export class Session extends EventTarget {
 			
 			// Send the command using current chunk's offset, chunk data, and
 			// the key to encrypt it with.
-			cmd = new FlashWriteCommand(offset, bytes.subarray(offset, offset + CHUNK_SIZE), this.#key);
-			packet = Packet.fromCommand(cmd);
-			this.#logPacket("TX", packet);
-			await this.#trx.transmitPacket(packet);
+			const cmd = new FlashWriteCommand(offset, bytes.subarray(offset, offset + CHUNK_SIZE), this.#key);
+			await this.#trx.transmitCommand(cmd);
 			
 			// Get response to the command.
-			packet = await this.#trx.receivePacket(Packet.sizeForResponseType(ResponseType.FlashWrite));
-			this.#logPacket("RX", packet);
-			if(!packet.isValid()) throw new InvalidPacketError();
-			resp = FlashWriteResponse.fromPacket(packet);
-			if(!resp.isValid()) throw new InvalidResponseError();
+			const resp = await this.#trx.receiveResponse(FlashWriteResponse);
+			if(!resp.valid) throw new InvalidResponseError();
 			if(!resp.success) throw new UnsuccessfulResponseError();
 		}
 		
 		// Send one final write command with zero-length data and offset at the
 		// end of the data, in order to get bootloader to write any still
 		// buffered data to flash.
-		cmd = new FlashWriteCommand(bytes.length, new Uint8Array(0), this.#key);
-		packet = Packet.fromCommand(cmd);
-		this.#logPacket("TX", packet);
-		await this.#trx.transmitPacket(packet);
+		const cmd = new FlashWriteCommand(bytes.length, new Uint8Array(0), this.#key);
+		await this.#trx.transmitCommand(cmd);
 		
 		// Get response to the finalisation command.
-		packet = await this.#trx.receivePacket(Packet.sizeForResponseType(ResponseType.FlashWrite));
-		this.#logPacket("RX", packet);
-		if(!packet.isValid()) throw new InvalidPacketError();
-		resp = FlashWriteResponse.fromPacket(packet);
-		if(!resp.isValid()) throw new InvalidResponseError();
+		const resp = await this.#trx.receiveResponse(FlashWriteResponse);
+		if(!resp.valid) throw new InvalidResponseError();
 		if(!resp.success) throw new UnsuccessfulResponseError();
 		
 		// One last progress call to finish off to 100%.
@@ -259,8 +226,6 @@ export class Session extends EventTarget {
 	async flashVerify(bytes) {
 		this.#logger.debug(++this.#sequence + ": Flash Verify");
 		
-		let packet, cmd, resp;
-		
 		for(let offset = 0; offset < bytes.length; offset += CHUNK_SIZE) {
 			// Call the progress callback with two arguments: the current number
 			// of bytes so far, and the total number.
@@ -268,17 +233,12 @@ export class Session extends EventTarget {
 			
 			// Send the command using current chunk's offset, chunk data, and
 			// the key to encrypt it with.
-			cmd = new FlashVerifyCommand(offset, bytes.subarray(offset, offset + CHUNK_SIZE), this.#key);
-			packet = Packet.fromCommand(cmd);
-			this.#logPacket("TX", packet);
-			await this.#trx.transmitPacket(packet);
+			const cmd = new FlashVerifyCommand(offset, bytes.subarray(offset, offset + CHUNK_SIZE), this.#key);
+			await this.#trx.transmitCommand(cmd);
 			
 			// Get response to the command.
-			packet = await this.#trx.receivePacket(Packet.sizeForResponseType(ResponseType.FlashVerify));
-			this.#logPacket("RX", packet);
-			if(!packet.isValid()) throw new InvalidPacketError();
-			resp = FlashVerifyResponse.fromPacket(packet);
-			if(!resp.isValid()) throw new InvalidResponseError();
+			const resp = await this.#trx.receiveResponse(FlashVerifyResponse);
+			if(!resp.valid) throw new InvalidResponseError();
 			if(!resp.success) throw new UnsuccessfulResponseError();
 		}
 		
@@ -288,23 +248,16 @@ export class Session extends EventTarget {
 	
 	async configRead() {
 		this.#logger.debug(++this.#sequence + ": Config Read");
-		
-		let packet, cmd, resp;
 
 		this.#progressEvent(null, null);
 		
 		// Send the command.
-		cmd = new ConfigReadCommand();
-		packet = Packet.fromCommand(cmd);
-		this.#logPacket("TX", packet);
-		await this.#trx.transmitPacket(packet);
+		const cmd = new ConfigReadCommand();
+		await this.#trx.transmitCommand(cmd);
 		
 		// Get response to the command.
-		packet = await this.#trx.receivePacket(Packet.sizeForResponseType(ResponseType.ConfigRead));
-		this.#logPacket("RX", packet);
-		if(!packet.isValid()) throw new InvalidPacketError();
-		resp = ConfigReadResponse.fromPacket(packet);
-		if(!resp.isValid()) throw new InvalidResponseError();
+		const resp = await this.#trx.receiveResponse(ConfigReadResponse);
+		if(!resp.valid) throw new InvalidResponseError();
 		if(!resp.success) throw new UnsuccessfulResponseError();
 		
 		// Verify the chip unique ID checksum and warn if mismatch.
@@ -343,23 +296,16 @@ export class Session extends EventTarget {
 	
 	async configWrite(config) {
 		this.#logger.debug(++this.#sequence + ": Config Write");
-		
-		let packet, cmd, resp;
 
 		this.#progressEvent(null, null);
 		
 		// Send the command with given config data.
-		cmd = new ConfigWriteCommand(config);
-		packet = Packet.fromCommand(cmd);
-		this.#logPacket("TX", packet);
-		await this.#trx.transmitPacket(packet);
+		const cmd = new ConfigWriteCommand(config);
+		await this.#trx.transmitCommand(cmd);
 		
 		// Get response to the command.
-		packet = await this.#trx.receivePacket(Packet.sizeForResponseType(ResponseType.ConfigWrite));
-		this.#logPacket("RX", packet);
-		if(!packet.isValid()) throw new InvalidPacketError();
-		resp = ConfigWriteResponse.fromPacket(packet);
-		if(!resp.isValid()) throw new InvalidResponseError();
+		const resp = await this.#trx.receiveResponse(ConfigWriteResponse);
+		if(!resp.valid) throw new InvalidResponseError();
 		if(!resp.success) throw new UnsuccessfulResponseError();
 		
 		this.#progressEvent(100, 100);
