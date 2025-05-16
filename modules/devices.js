@@ -47,17 +47,20 @@ export class DevicesDatabase {
 	findDeviceByIndex(val) {
 		const [famIdx, devIdx] = val.split(":").map((str) => Number.parseInt(str));
 		
-		if(famIdx >= 0 && devIdx >= 0) {
+		if(famIdx >= 0 && devIdx >= 0 && this.#devices instanceof Array) {
 			const family = this.#devices.at(famIdx);
-			if(family) {
+			if(family && "devices" in family && family["devices"] instanceof Array) {
 				const device = family["devices"].at(devIdx);
 				if(device) {
+					if("connection" in family) {
+						device["connection"] = family["connection"];
+					}
 					return device;
 				}
 			}
 		}
 		
-		throw new Error("Device not found or invalid index string");
+		throw new Error("Device not found, invalid index string, or invalid device data");
 	}
 	
 	findDeviceIndexByName(name) {
