@@ -207,11 +207,10 @@ p#actions {
 
 p#actions > button {
 	margin-right: 1em;
-	padding-left: 1.95em;
+	padding: 0.5em 0.25em 0.5em 1.95em;
 	background-repeat: no-repeat;
 	background-position: 0.25em center;
 	background-size: 1.5em;
-	height: 2.1em;
 }
 
 p#actions > button:last-child {

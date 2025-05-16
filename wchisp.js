@@ -274,6 +274,7 @@ window.addEventListener("load", (event) => {
 		const flashWrite = document.getElementById("flash_write");
 		const flashVerify = document.getElementById("flash_verify");
 		const flashErase = document.getElementById("flash_erase");
+		const endReset = document.getElementById("end_reset");
 		const logClear = document.getElementById("log_clear");
 		
 		let device, firmware;
@@ -424,7 +425,7 @@ window.addEventListener("load", (event) => {
 				await sess.start()
 					.then(() => sess.identify())
 					.then(() => sess.configRead())
-					.then((config) => (populateConfig(config), sess.reset(true)))
+					.then((config) => (populateConfig(config), sess.reset(endReset.checked)))
 					.then(() => success = true)
 					.catch((err) => logger.error(err.message))
 					.finally(() => sess.end());
@@ -448,7 +449,7 @@ window.addEventListener("load", (event) => {
 					.then(() => sess.identify())
 					.then(() => sess.configRead())
 					.then(() => sess.configWrite(getConfigBytes()))
-					.then(() => sess.reset(true))
+					.then(() => sess.reset(endReset.checked))
 					.then(() => success = true)
 					.catch((err) => logger.error(err.message))
 					.finally(() => sess.end());
@@ -475,7 +476,7 @@ window.addEventListener("load", (event) => {
 					.then(() => sess.flashWrite(firmware.bytes))
 					.then(() => sess.keyGenerate())
 					.then(() => sess.flashVerify(firmware.bytes))
-					.then(() => sess.reset(true))
+					.then(() => sess.reset(endReset.checked))
 					.then(() => success = true)
 					.catch((err) => logger.error(err.message))
 					.finally(() => sess.end());
@@ -499,7 +500,7 @@ window.addEventListener("load", (event) => {
 					.then(() => sess.configRead())
 					.then(() => sess.keyGenerate())
 					.then(() => sess.flashVerify(firmware.bytes))
-					.then(() => sess.reset(true))
+					.then(() => sess.reset(endReset.checked))
 					.then(() => success = true)
 					.catch((err) => logger.error(err.message))
 					.finally(() => sess.end());
@@ -526,7 +527,7 @@ window.addEventListener("load", (event) => {
 						.then(() => sess.identify())
 						.then(() => sess.configRead())
 						.then(() => sess.flashErase(Math.ceil(device["flash"]["size"] / 1024)))
-						.then(() => sess.reset(true))
+						.then(() => sess.reset(endReset.checked))
 						.then(() => success = true)
 						.catch((err) => logger.error(err.message))
 						.finally(() => sess.end());
