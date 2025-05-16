@@ -544,8 +544,6 @@ window.addEventListener("load", (event) => {
 			clearLog();
 		});
 		
-		// TODO: add URL param for connection (usb/uart)?
-		
 		// Wait a moment after page has fully loaded to allow browser auto-fill
 		// of form inputs to occur, then try and take actions where necessary
 		// according to their values. This is a bit of a hack, because there's
@@ -566,6 +564,24 @@ window.addEventListener("load", (event) => {
 				if(deviceList.selectedOptions.length > 0) {
 					deviceList.dispatchEvent(new Event("change"));
 				}
+			}
+			
+			if(params.has("conn")) {
+				// If connection method matches one of those available, then
+				// automatically select it.
+				const conn = [deviceConnectUsb, deviceConnectUart].find((opt) => {
+					return (opt.value === params.get("conn").toLowerCase());
+				});
+				if(conn) {
+					conn.checked = true;
+					conn.dispatchEvent(new Event("change"));
+				}
+			} else {
+				// Otherwise, handle any auto-filled selection.
+				// TODO: is this actually necessary?
+				[deviceConnectUsb, deviceConnectUart].forEach((opt) => {
+					if(opt.checked) opt.dispatchEvent(new Event("change"));
+				});
 			}
 			
 			if(params.has("fw")) {
