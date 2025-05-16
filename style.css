@@ -20,9 +20,13 @@ h1 {
 div#unsupported {
 	background-color: #FFEF00;
 	border: 4px dashed black;
-	padding: 1em;
 	font-size: 1.5em;
 	text-align: center;
+	text-wrap: balance;
+}
+
+div#unsupported p {
+	margin: 1em;
 }
 
 div#unsupported p:first-child {

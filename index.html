@@ -11,7 +11,7 @@
 		<h1>WCH RISC-V Microcontroller Web Serial ISP</h1>
 		
 		<div id="unsupported">
-			<p>Your browser does not appear to support the Web Serial API</p>
+			<p>Your browser does not appear to support the Web USB and Web Serial APIs</p>
 			<p>
 				Currently, only the following browsers feature support:<br />
 				Chrome (v89+), Edge (v89+), Opera (v76+)
@@ -19,7 +19,7 @@
 		</div>
 
 		<script>
-			if("serial" in navigator) {
+			if("serial" in navigator && "usb" in navigator) {
 				document.getElementById("unsupported").classList.add("hidden");
 			}
 		</script>
