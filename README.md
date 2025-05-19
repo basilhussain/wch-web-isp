@@ -1,15 +1,15 @@
-# WCH RISC-V Microcontroller Web Serial ISP
+# WCH RISC-V Microcontroller Web ISP
 
-This is a serial ISP flashing tool for WCH RISC-V microcontrollers that runs in a web browser. Entirely self-contained, with no additional software, libraries, or drivers required.
+This is an ISP flashing tool for WCH RISC-V microcontrollers that runs in a web browser. Entirely self-contained, with no additional software, libraries, or drivers required.
 
-It uses the JavaScript [Web Serial](https://developer.mozilla.org/en-US/docs/Web/API/SerialPort) browser API, and so requires support for this feature by the browser. At time of writing, only the following browsers feature support for the Web Serial API: Chrome version 89+, Edge version 89+, Opera version 76+. This tool does not work in FireFox and Safari, due to lack of support for the API.
+It uses the JavaScript [Web USB](https://developer.mozilla.org/en-US/docs/Web/API/WebUSB_API) and [Web Serial](https://developer.mozilla.org/en-US/docs/Web/API/SerialPort) browser APIs, and so requires support for these features by the browser. At time of writing, only the following browsers feature support for both the Web USB and Web Serial APIs: Chrome version 89+, Edge version 89+, Opera version 76+. This tool does not work in FireFox and Safari, due to lack of support for the APIs.
 
 > [!NOTE]
 > **You can find a hosted version of this tool on my website, at: [https://www.stasisleak.uk/wchisp/](https://www.stasisleak.uk/wchisp/).**
 
 ## Features
 
-* Connect using any available serial port (e.g. COM/TTY) interface.
+* Connect using any available USB or serial port (e.g. COM/TTY) interface.
 * Write, verify, and erase user application flash.
 * Read and write configuration option bytes.
 * Loads firmware images in these formats:
@@ -18,9 +18,9 @@ It uses the JavaScript [Web Serial](https://developer.mozilla.org/en-US/docs/Web
   * ELF
   * Raw binary
 * Load firmware from local file or external URL.
-* Can take query string parameters to auto-select device and/or auto-load firmware from URL.
+* Can take query string parameters to auto-select device, connection method, and/or auto-load firmware from URL.
 * Hex preview listing of loaded firmware image.
-* Optional DTR/RTS sequence for auto-reset into bootloader.
+* Optional UART DTR/RTS sequence for auto-reset into bootloader.
 
 Currently supported RISC-V WCH microcontrollers:
 
@@ -35,7 +35,6 @@ Currently supported RISC-V WCH microcontrollers:
 
 * This tool only works with the WCH factory bootloader. If you have overwritten a chip's bootloader code (the 'BOOT' flash area) with a custom bootloader, this tool will not be compatible.
 * The WCH bootloader protocol does not support *reading* user application flash. There is no command within the bootloader to do so.
-* Native USB communication is not supported.
 
 ## Building
 
