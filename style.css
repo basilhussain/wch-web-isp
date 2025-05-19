@@ -351,6 +351,14 @@ section.help hgroup table th {
 	vertical-align: bottom;
 }
 
+section.help hgroup table#boot_pins td {
+	white-space: nowrap;
+}
+
+section.help hgroup table#boot_pins td:last-child {
+	white-space: normal;
+}
+
 section.help hgroup p span.note {
 	font-size: 0.8em;
 	font-style: italic;
