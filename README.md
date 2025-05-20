@@ -42,15 +42,25 @@ Currently supported RISC-V WCH microcontrollers:
 > [!NOTE]
 > **A pre-built copy can be found in the Releases section of the GitHub repository.**
 
-Building requires the bundling tool [esbuild](https://esbuild.github.io/), a copy of which needs be installed in a `tools\esbuild` sub-folder of the project. Please note building is currently only supported on Windows.
+Building requires the bundling tool [esbuild](https://esbuild.github.io/), a copy of which will need to be installed in a `tools` sub-folder of the project - see below for details.
 
-To build:
+### Windows
+
+You must have a copy of the `esbuild.exe` binary executable in a `tools\esbuild` sub-folder.
 
 1. Open a command prompt in the project folder.
 2. Run `build.bat`.
 3. The resultant HTML, JS, and CSS files will be output to the `dist` sub-folder.
 
-If any Linux/Mac users are feeling resourceful, they may wish to review the contents of `build.bat` and translate the script within to an appropriate shell script or discrete commands. 😄
+### Linux
+
+You must have a copy of the `esbuild` binary executable in a `tools/esbuild/bin` sub-folder.
+
+1. Open a terminal and navigate to the project folder.
+2. Run `build.sh`. You may need to first add 'execute' permissions to the script file (e.g. `chmod a+x build.sh`).
+3. The resultant HTML, JS, and CSS files will be output to the `dist` sub-folder.
+
+The Linux build script may also be useful on other Unix-like platforms - e.g. Mac, BSDs, etc. - but has not been tested with any of them.
 
 ## Running
 
