@@ -55,7 +55,7 @@ export class UsbTransceiver {
 		this.#logger.info("Opening USB connection");
 		
 		try {
-			this.#device = await navigator.usb.requestDevice({ filters: DEVICE_FILTERS })
+			this.#device = await navigator.usb.requestDevice({ filters: DEVICE_FILTERS });
 		} catch(err) {
 			throw new Error("USB device selection cancelled or permission denied", { cause: err });
 		}
