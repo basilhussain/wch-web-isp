@@ -329,37 +329,41 @@ section.help > h2 {
 	padding-bottom: 0.2em;
 }
 
-section.help hgroup p, section.help hgroup ul, section.help hgroup ol, section.help hgroup table {
+section.help > div {
+	margin: 0;
+}
+
+section.help div p, section.help div ul, section.help div ol, section.help div table {
 	margin-left: 3em;
 }
 
-section.help hgroup table {
+section.help div table {
 	border: 1px solid #767676;
 	border-spacing: 0;
 	border-collapse: collapse;
 }
 
-section.help hgroup table td, section.help hgroup table th {
+section.help div table td, section.help div table th {
 	border: 1px solid #767676;
 	padding: 0.2em 0.5em;
 	vertical-align: middle;
 }
 
-section.help hgroup table th {
+section.help div table th {
 	font-weight: bold;
 	white-space: nowrap;
 	vertical-align: bottom;
 }
 
-section.help hgroup table#boot_pins td {
+section.help div table#boot_pins td {
 	white-space: nowrap;
 }
 
-section.help hgroup table#boot_pins td:last-child {
+section.help div table#boot_pins td:last-child {
 	white-space: normal;
 }
 
-section.help hgroup p span.note {
+section.help div p span.note {
 	font-size: 0.8em;
 	font-style: italic;
 }
